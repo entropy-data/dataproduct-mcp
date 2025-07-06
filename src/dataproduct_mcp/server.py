@@ -12,7 +12,72 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP("dataproduct")
+mcp = FastMCP(
+    name="DataProductServer",
+    instructions="""
+You are connected to the Data Product MCP server, which provides access to organizational data through a data mesh manager.
+
+## Available Tools
+
+### 1. dataproduct_search
+- **Purpose**: Find and explore data products in the organization
+- **Parameters**: 
+  - `search_term` (optional): Keywords to search for in data product names/descriptions
+  - `archetype` (optional): Filter by type (consumer-aligned, aggregate, source-aligned, application, dataconsumer)
+- **Returns**: List of active data products with basic information
+- **Strategy**: Uses multiple search approaches (list, semantic search, fallback) for comprehensive results
+
+### 2. dataproduct_get
+- **Purpose**: Get detailed information about a specific data product
+- **Parameters**: `data_product_id` (required)
+- **Returns**: Complete data product details including:
+  - All output ports with server connection information
+  - Access status for each port (active, pending, rejected, etc.)
+  - Inlined data contracts with schemas and terms of use
+- **Use**: Get this info before requesting access or querying data
+
+### 3. dataproduct_request_access
+- **Purpose**: Request access to a specific data product output port
+- **Parameters**: 
+  - `data_product_id` (required)
+  - `output_port_id` (required) 
+  - `purpose` (required): Business justification for access
+- **Returns**: Access request status (may be auto-approved or require manual review)
+
+### 4. dataproduct_query
+- **Purpose**: Execute SQL queries on data product output ports
+- **Requirements**: Must have active access to the output port
+- **Parameters**:
+  - `data_product_id` (required)
+  - `output_port_id` (required)
+  - `query` (required): SQL query to execute
+- **Supports**: Snowflake and Databricks platforms
+- **Returns**: Query results in YAML format (limited to 100 rows)
+
+### 5. datacontract_get
+- **Purpose**: Get standalone data contract details
+- **Parameters**: `data_contract_id` (required)
+- **Note**: Usually not needed since dataproduct_get now inlines contracts
+
+## Typical Workflow
+
+1. **Discover**: Use `dataproduct_search` to find relevant data products
+2. **Evaluate**: Use `dataproduct_get` to understand structure, access status, and schemas
+3. **Request Access**: Use `dataproduct_request_access` if you don't have active access
+4. **Query Data**: Use `dataproduct_query` to execute SQL queries once you have access for typical server types. For other server types, you may need to use server-specific tools.
+
+## Data Governance
+- Only active data products are returned
+- Access requests may require business justification
+- All queries are subject to data governance policies
+- Respect data contracts' terms of use
+
+## Environment Setup
+For database connections, you may need to set environment variables:
+- Snowflake: SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE
+- Databricks: DATABRICKS_ACCESS_TOKEN
+    """
+)
 
 
 @mcp.tool()
@@ -134,8 +199,7 @@ async def dataproduct_search(
 async def dataproduct_get(data_product_id: str) -> str:
     """
     Get a data product by its ID. The data product contains all its output ports and server information.
-    The response includes access status for each output port and may include a data contract ID.
-    You can use the datacontract_get tool to get the details of the data contract for more semantic information and terms of use.
+    The response includes access status for each output port and inlines any data contracts.
     
     Args:
         data_product_id: The data product ID.
@@ -188,6 +252,23 @@ async def dataproduct_get(data_product_id: str) -> str:
             except Exception as e:
                 logger.warning(f"Failed to get access status for output port {output_port.get('externalId', 'unknown')}: {str(e)}")
                 output_port["accessStatus"] = None
+            
+            # Resolve and inline data contract if dataContractId exists
+            data_contract_id = output_port.get("dataContractId")
+            if data_contract_id:
+                try:
+                    logger.info(f"Resolving data contract {data_contract_id} for output port {output_port.get('id', 'unknown')}")
+                    data_contract = await client.get_data_contract(data_contract_id)
+                    
+                    if data_contract:
+                        output_port["dataContract"] = data_contract
+                        logger.info(f"Successfully inlined data contract {data_contract_id}")
+                    else:
+                        logger.warning(f"Data contract {data_contract_id} not found")
+                        output_port["dataContract"] = None
+                except Exception as e:
+                    logger.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
+                    output_port["dataContract"] = None
         
         # Convert the enhanced data product to YAML format
         import yaml
