@@ -12,7 +12,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
-mcp = FastMCP("datamesh-manager")
+mcp = FastMCP("dataproduct")
 
 
 @mcp.tool()
@@ -32,7 +32,7 @@ async def dataproduct_search(
     
     try:
         client = DataMeshManagerClient()
-        formatted_products = []
+        results = []
         
         # First, try the list endpoint (supports archetype and status filters)
         try:
@@ -53,22 +53,22 @@ async def dataproduct_search(
                         "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A",
                         "source": "simple_search"
                     }
-                    formatted_products.append(formatted_product)
+                    results.append(formatted_product)
                 
-                logger.info(f"List endpoint returned {len(formatted_products)} data products")
+                logger.info(f"List endpoint returned {len(results)} data products")
         
         except Exception as e:
             logger.warning(f"List endpoint failed: {str(e)}")
         
         # If no results from list endpoint or search_term provided, try semantic search
-        if (not formatted_products and search_term) or (search_term and not archetype):
+        if (not results and search_term) or (search_term and not archetype):
             try:
                 logger.info("Trying semantic search endpoint")
                 search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
                 search_data_products = search_results.get("results", [])
                 
                 # Add results from search endpoint (avoid duplicates)
-                existing_ids = {dp["id"] for dp in formatted_products}
+                existing_ids = {dp["id"] for dp in results}
                 
                 for dp in search_data_products:
                     dp_id = dp.get("id", "N/A")
@@ -81,7 +81,7 @@ async def dataproduct_search(
                             "ownerName": dp.get("ownerName") or "N/A",
                             "source": "semantic_search"
                         }
-                        formatted_products.append(formatted_product)
+                        results.append(formatted_product)
                 
                 logger.info(f"Search endpoint added {len(search_data_products)} additional data products")
             
@@ -89,7 +89,7 @@ async def dataproduct_search(
                 logger.warning(f"Search endpoint failed: {str(e)}")
         
         # If still no results, try getting all active data products without search query
-        if not formatted_products:
+        if not results:
             try:
                 logger.info("No results from list or search endpoints, trying to get all active data products")
                 data_products = await client.get_data_products(
@@ -108,19 +108,19 @@ async def dataproduct_search(
                             "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A",
                             "source": "all_data_products"
                         }
-                        formatted_products.append(formatted_product)
+                        results.append(formatted_product)
                     
-                    logger.info(f"Fallback list endpoint returned {len(formatted_products)} data products")
+                    logger.info(f"Fallback list endpoint returned {len(results)} data products")
             
             except Exception as e:
                 logger.warning(f"Fallback list endpoint failed: {str(e)}")
         
-        if not formatted_products:
+        if not results:
             logger.info("No data products found from any endpoint")
             return []
         
-        logger.info(f"dataproduct_search returned {len(formatted_products)} total data products")
-        return formatted_products
+        logger.info(f"dataproduct_search returned {len(results)} total data products")
+        return results
         
     except ValueError as e:
         logger.error(f"dataproduct_search ValueError: {str(e)}")
