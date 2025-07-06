@@ -7,23 +7,13 @@
               "--directory", "<path_to_folder>/dataproduct-mcp",
               "python", "-m", "dataproduct_mcp.server"
               ],
-            "env": {
-              "DATAMESH_MANAGER_API_KEY": ""
-            }
-        },
-        "snowflake": {
-          "command": "uvx",
-          "args": [
-            "--python=3.12",
-            "mcp_snowflake_server",
-            "--account", "",
-            "--warehouse", "COMPUTE_WH",
-            "--user", "",
-            "--password", "",
-            "--role", "",
-            "--database", "",
-            "--schema", ""
-          ]
+          "env": {
+            "DATAMESH_MANAGER_API_KEY": "dmm_live_user_SbyHMJWGjXvBfoit3yq614OFp07AWNuKe6QjNiICZhVlGqoAntNdstrj3j4VYBi7",
+            "SNOWFLAKE_USER": "MY_SNOWFLAKE_USER_NAME",
+            "SNOWFLAKE_PASSWORD": "MY_SNOWFLAKE_PASSWORD",
+            "SNOWFLAKE_ROLE": "MY_SNOWFLAKE_ROLE",
+            "SNOWFLAKE_WAREHOUSE": "COMPUTE_WH"
+          }
         }
     }
 }

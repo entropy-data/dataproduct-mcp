@@ -3,6 +3,8 @@ import logging
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
+from .connections.snowflake_client import execute_snowflake_query
+from .connections.databricks_client import execute_databricks_query
 
 load_dotenv()
 
@@ -11,37 +13,6 @@ logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
 mcp = FastMCP("datamesh-manager")
-
-# Prompts
-@mcp.prompt(name="Initial Prompt")
-def initial_prompt() -> str:
-    return """
-You are now connected to the Data Mesh Manager through the Model Context Protocol (MCP).
-
-Data Mesh Manager lists data products in the organization that you can use to get domain-specific data.
-
-1. DISCOVERING DATA PRODUCTS
-a) You can use the dataproduct_list tool to list data products in the organization. 
-   You can add filters to the dataproduct_list tool to filter data products by name, description, owner, and status.
-b) Alternatively, you can use the dataproduct_search tool to search for data products by semantics search, where more information are indexed.
-
-2. GETTING DATA PRODUCT DETAILS
-  - Both tools above return the data product ID.
-  - You can use the dataproduct_get tool to get the details of a data product.
-  - A data product contains a list of output ports. An output port can be associated with a data contract.
-  - The output port includes server information to physically access the data (e.g., Databricks, Snowflake, etc.)
-
-3. WORKING WITH DATA CONTRACTS
-  - If an output port links to a data contract, you can use the datacontract_get tool to get the details of the data contract.
-  - A data contract contains the terms of use for accessing the data. You must adhere to the terms of use when accessing the data.
-  - A data contract contains the schema of the data model. Use this schema to identify if the data product is suitable for your use case.
-  - Use the schema if you later build queries (e.g., SQL) to access the data.
-  - The data model also contains descriptions and other information about the data that you can use to understand the data.
-
-4. REQUESTING ACCESS TO DATA
-  - If you don't have access to a data product output port, you can use the dataproduct_request_access tool to request access.
-  - You need to provide the data product ID, output port ID, and a business purpose for why you need access.
-  - The system will automatically approve your request if instant access is enabled, otherwise it will be sent to the data product owner for review."""
 
 
 @mcp.tool()
@@ -171,19 +142,23 @@ async def dataproduct_get(data_product_id: str) -> str:
                     access_status = await client.get_access_status(data_product_id, output_port_id)
 
                     # Set output_port["accessStatus"] based on the result of access_status
-                    status = access_status.access_status if access_status else None
-                    if not status:
+                    lifecycle_status = access_status.access_lifecycle_status if access_status else None
+                    access_status_value = access_status.access_status if access_status else None
+                    
+                    if not lifecycle_status:
                         output_port["accessStatus"] = "You do not have access to this output port, you can request access. You may not access the data directly for data governance reasons without an approved access request."
-                    elif status == "REQUESTED" or status == "UPCOMING":
-                        output_port["accessStatus"] = "Your access request is pending approval. You may not access the data directly for data governance reasons without an approved access request."
-                    elif status == "REJECTED":
-                        output_port["accessStatus"] = "Your access request was rejected"
-                    elif status == "ACTIVE":
-                        output_port["accessStatus"] = "You have access to this output port"
-                    elif status == "EXPIRED":
-                        output_port["accessStatus"] = "Your access request is expired"
+                    elif lifecycle_status == "requested":
+                        output_port["accessStatus"] = f"Your access request is pending approval (status: {access_status_value}, lifecycle: {lifecycle_status}). You may not access the data directly for data governance reasons without an approved access request."
+                    elif lifecycle_status == "rejected":
+                        output_port["accessStatus"] = f"Your access request was rejected (status: {access_status_value}, lifecycle: {lifecycle_status})"
+                    elif lifecycle_status == "upcoming":
+                        output_port["accessStatus"] = f"Your access is upcoming (status: {access_status_value}, lifecycle: {lifecycle_status}). You may not access the data directly for data governance reasons without an approved access request."
+                    elif lifecycle_status == "active":
+                        output_port["accessStatus"] = f"You have access to this output port (status: {access_status_value}, lifecycle: {lifecycle_status})"
+                    elif lifecycle_status == "expired":
+                        output_port["accessStatus"] = f"Your access request is expired (status: {access_status_value}, lifecycle: {lifecycle_status})"
                     else:
-                        output_port["accessStatus"] = f"Unknown access status: {status}"
+                        output_port["accessStatus"] = f"Access status: {access_status_value}, lifecycle: {lifecycle_status}"
 
                     logger.info(f"Added access status for output port {output_port_id}")
                 else:
@@ -294,6 +269,117 @@ Your access request has been submitted and is now {result.status}. You will be n
     except Exception as e:
         logger.error(f"dataproduct_request_access Exception: {str(e)}")
         return f"Error requesting access: {str(e)}"
+
+
+@mcp.tool()
+async def dataproduct_query(data_product_id: str, output_port_id: str, query: str) -> str:
+    """
+    Execute a SQL query on a data product's output port.
+    This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
+    You must have access to the output port to execute queries.
+    
+    Args:
+        data_product_id: The ID of the data product.
+        output_port_id: The ID of the output port to query.
+        query: The SQL query to execute.
+    """
+    logger.info(f"dataproduct_query called with data_product_id={data_product_id}, output_port_id={output_port_id}")
+    
+    try:
+        # First, get the data product details to retrieve server information
+        client = DataMeshManagerClient()
+        data_product = await client.get_data_product(data_product_id)
+        
+        if not data_product:
+            logger.error(f"Data product {data_product_id} not found")
+            return "Error: Data product not found"
+        
+        # Find the specified output port
+        output_ports = data_product.get("outputPorts", [])
+        target_output_port = None
+        
+        for output_port in output_ports:
+            if output_port.get("id") == output_port_id:
+                target_output_port = output_port
+                break
+        
+        if not target_output_port:
+            logger.error(f"Output port {output_port_id} not found in data product {data_product_id}")
+            return "Error: Output port not found"
+        
+        # Check access status
+        try:
+            access_status = await client.get_access_status(data_product_id, output_port_id)
+            if not access_status or access_status.access_lifecycle_status != "active":
+                current_status = access_status.access_lifecycle_status if access_status else "unknown"
+                logger.error(f"No active access to output port {output_port_id}, current status: {current_status}")
+                return f"Error: You do not have active access to this output port. Current access status: {current_status}. Please request access first using dataproduct_request_access."
+        except Exception as e:
+            logger.error(f"Failed to check access status: {str(e)}")
+            return "Error: Unable to verify access status. Please ensure you have access to this output port."
+
+        # Check that the query is in line with the purpose of the access agreement (dont be strict)
+        # this check can be performed using a callback to the llm
+        # todo
+
+
+        # In the future, we can also check that the query is not violating any global policies
+
+
+        # Get server information and type
+        server_info = target_output_port.get("server", {})
+        if not server_info:
+            logger.error(f"No server information found for output port {output_port_id}")
+            return "Error: No server information available for this output port"
+        
+        # Get server type from output port type field
+        server_type = target_output_port.get("type", "").lower()
+        if server_type not in ["snowflake", "databricks"]:
+            logger.error(f"Unsupported server type: {server_type}")
+            return f"Error: Unsupported server type '{server_type}'. Supported types: snowflake, databricks"
+
+        # Execute the query based on server type
+        try:
+            if server_type == "snowflake":
+                results = await execute_snowflake_query(server_info, query)
+            elif server_type == "databricks":
+                results = await execute_databricks_query(server_info, query)
+            else:
+                return f"Error: Server type '{server_type}' is not yet supported by dataproduct-mcp. Supported types: snowflake, databricks"
+            
+            # Format results for display
+            if not results:
+                return "Query executed successfully, but returned no results."
+            
+            # Convert results to YAML format for consistent output
+            import yaml
+            formatted_results = {
+                "query": query,
+                "row_count": len(results),
+                "results": results[:100]  # Limit to first 100 rows to avoid overwhelming output
+            }
+            
+            if len(results) > 100:
+                formatted_results["note"] = f"Results truncated to first 100 rows. Total rows: {len(results)}"
+            
+            yaml_output = yaml.dump(formatted_results, default_flow_style=False, sort_keys=False)
+
+            # check that that there are no prompt injections in the results
+            # todo
+
+            logger.info(f"Query executed successfully, returned {len(results)} rows")
+            return yaml_output
+            
+        except Exception as e:
+            logger.error(f"Failed to execute query: {str(e)}")
+            return f"Error executing query: {str(e)}"
+        
+    except ValueError as e:
+        logger.error(f"dataproduct_query ValueError: {str(e)}")
+        return f"Error: {str(e)}"
+    except Exception as e:
+        logger.error(f"dataproduct_query Exception: {str(e)}")
+        return f"Error: {str(e)}"
 
 
 if __name__ == "__main__":
