@@ -52,7 +52,7 @@ You are connected to the Data Product MCP server, which provides access to organ
   - `output_port_id` (required)
   - `query` (required): SQL query to execute
 - **Supports**: Snowflake and Databricks platforms
-- **Returns**: Query results in YAML format (limited to 100 rows)
+- **Returns**: Query results as structured data (limited to 100 rows)
 
 ### 5. datacontract_get
 - **Purpose**: Get standalone data contract details
@@ -92,6 +92,9 @@ async def dataproduct_search(
         search_term: Search term to filter data products. Multiple search terms are supported, separated by space.
         archetype: Filter for specific data product types. Typical values are: consumer-aligned, 
                   aggregate, source-aligned, application, dataconsumer
+                  
+    Returns:
+        List of data product summaries with basic information, or list with error object.
     """
     logger.info(f"dataproduct_search called with search_term={search_term}, archetype={archetype}")
     
@@ -196,13 +199,16 @@ async def dataproduct_search(
 
 
 @mcp.tool()
-async def dataproduct_get(data_product_id: str) -> str:
+async def dataproduct_get(data_product_id: str) -> Dict[str, Any]:
     """
     Get a data product by its ID. The data product contains all its output ports and server information.
     The response includes access status for each output port and inlines any data contracts.
     
     Args:
         data_product_id: The data product ID.
+        
+    Returns:
+        Dict containing the data product details with enhanced output ports, or error object.
     """
     logger.info(f"dataproduct_get called with data_product_id={data_product_id}")
     
@@ -212,7 +218,7 @@ async def dataproduct_get(data_product_id: str) -> str:
         
         if not data_product:
             logger.info(f"dataproduct_get: data product {data_product_id} not found")
-            return "Data product not found"
+            return {"error": "Data product not found"}
         
         # todo make null safe
         access_lifecycle_status = "You do not have access to this output port"
@@ -270,27 +276,28 @@ async def dataproduct_get(data_product_id: str) -> str:
                     logger.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
                     output_port["dataContract"] = None
         
-        # Convert the enhanced data product to YAML format
-        import yaml
-        yaml_data = yaml.dump(data_product, default_flow_style=False, sort_keys=False)
+        # Return the enhanced data product directly as structured data
         logger.info(f"dataproduct_get successfully retrieved data product {data_product_id} with access status")
-        return yaml_data
+        return data_product
         
     except ValueError as e:
         logger.error(f"dataproduct_get ValueError: {str(e)}")
-        return f"Error: {str(e)}"
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"dataproduct_get Exception: {str(e)}")
-        return f"Error fetching data product: {str(e)}"
+        return {"error": f"Error fetching data product: {str(e)}"}
 
 
 @mcp.tool()
-async def datacontract_get(data_contract_id: str) -> str:
+async def datacontract_get(data_contract_id: str) -> Dict[str, Any]:
     """
     Get a data contract by its ID.
     
     Args:
         data_contract_id: The data contract ID.
+        
+    Returns:
+        Dict containing the data contract details, or error object.
     """
     logger.info(f"datacontract_get called with data_contract_id={data_contract_id}")
     
@@ -300,24 +307,22 @@ async def datacontract_get(data_contract_id: str) -> str:
         
         if not data_contract:
             logger.info(f"datacontract_get: data contract {data_contract_id} not found")
-            return "Data contract not found"
+            return {"error": "Data contract not found"}
         
-        # Convert the data contract to YAML format
-        import yaml
-        yaml_data = yaml.dump(data_contract, default_flow_style=False, sort_keys=False)
+        # Return the data contract directly as structured data
         logger.info(f"datacontract_get successfully retrieved data contract {data_contract_id}")
-        return yaml_data
+        return data_contract
         
     except ValueError as e:
         logger.error(f"datacontract_get ValueError: {str(e)}")
-        return f"Error: {str(e)}"
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"datacontract_get Exception: {str(e)}")
-        return f"Error fetching data contract: {str(e)}"
+        return {"error": f"Error fetching data contract: {str(e)}"}
 
 
 @mcp.tool()
-async def dataproduct_request_access(data_product_id: str, output_port_id: str, purpose: str) -> str:
+async def dataproduct_request_access(data_product_id: str, output_port_id: str, purpose: str) -> Dict[str, Any]:
     """
     Request access to a specific output port of a data product.
     This creates an access request. Based on the data product configuration, purpose, and data governance rules,
@@ -327,6 +332,9 @@ async def dataproduct_request_access(data_product_id: str, output_port_id: str, 
         data_product_id: The ID of the data product.
         output_port_id: The ID of the output port to request access to.
         purpose: The business purpose/reason for requesting access to this data.
+        
+    Returns:
+        Dict containing access request details including access_id, status, and approval information, or error object.
     """
     logger.info(f"dataproduct_request_access called with data_product_id={data_product_id}, output_port_id={output_port_id}, purpose={purpose}")
     
@@ -336,45 +344,32 @@ async def dataproduct_request_access(data_product_id: str, output_port_id: str, 
         
         # Check if access was automatically granted based on status
         status_lower = result.status.lower()
+        auto_approved = status_lower in ["active"]
         
-        if status_lower in ["active"]:
-            # Access was automatically granted
-            response = f"""🎉 Access granted automatically!
-
-Access Request Details:
-- Access ID: {result.access_id}
-- Status: {result.status}
-- Data Product: {data_product_id}
-- Output Port: {output_port_id}
-- Purpose: {purpose}
-
-Your access request was automatically approved. You now have access to this data product output port using the server details and can start using the data immediately."""
-        else:
-            # Access requires manual approval
-            response = f"""Access request submitted successfully!
-
-Access Request Details:
-- Access ID: {result.access_id}
-- Status: {result.status}
-- Data Product: {data_product_id}
-- Output Port: {output_port_id}
-- Purpose: {purpose}
-
-Your access request has been submitted and is now {result.status}. You will be notified when the data product owner reviews your request. You can check the status in dataproduct details in the output port."""
+        # Return structured response data
+        response = {
+            "access_id": result.access_id,
+            "status": result.status,
+            "data_product_id": data_product_id,
+            "output_port_id": output_port_id,
+            "purpose": purpose,
+            "auto_approved": auto_approved,
+            "message": "Access granted automatically! You now have access to this data product output port using the server details and can start using the data immediately." if auto_approved else f"Access request submitted successfully and is now {result.status}. You will be notified when the data product owner reviews your request. You can check the status in dataproduct details in the output port."
+        }
         
         logger.info(f"dataproduct_request_access successfully submitted for data_product_id={data_product_id}, access_id={result.access_id}, status={result.status}")
         return response
         
     except ValueError as e:
         logger.error(f"dataproduct_request_access ValueError: {str(e)}")
-        return f"Error: {str(e)}"
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"dataproduct_request_access Exception: {str(e)}")
-        return f"Error requesting access: {str(e)}"
+        return {"error": f"Error requesting access: {str(e)}"}
 
 
 @mcp.tool()
-async def dataproduct_query(data_product_id: str, output_port_id: str, query: str) -> str:
+async def dataproduct_query(data_product_id: str, output_port_id: str, query: str) -> Dict[str, Any]:
     """
     Execute a SQL query on a data product's output port.
     This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
@@ -384,6 +379,9 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         data_product_id: The ID of the data product.
         output_port_id: The ID of the output port to query.
         query: The SQL query to execute.
+        
+    Returns:
+        Dict containing query results with row count and data (limited to 100 rows), or error object.
     """
     logger.info(f"dataproduct_query called with data_product_id={data_product_id}, output_port_id={output_port_id}")
     
@@ -394,7 +392,7 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         
         if not data_product:
             logger.error(f"Data product {data_product_id} not found")
-            return "Error: Data product not found"
+            return {"error": "Data product not found"}
         
         # Find the specified output port
         output_ports = data_product.get("outputPorts", [])
@@ -407,7 +405,7 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         
         if not target_output_port:
             logger.error(f"Output port {output_port_id} not found in data product {data_product_id}")
-            return "Error: Output port not found"
+            return {"error": "Output port not found"}
         
         # Check access status
         try:
@@ -415,10 +413,10 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
             if not access_status or access_status.access_lifecycle_status != "active":
                 current_status = access_status.access_lifecycle_status if access_status else "unknown"
                 logger.error(f"No active access to output port {output_port_id}, current status: {current_status}")
-                return f"Error: You do not have active access to this output port. Current access status: {current_status}. Please request access first using dataproduct_request_access."
+                return {"error": f"You do not have active access to this output port. Current access status: {current_status}. Please request access first using dataproduct_request_access."}
         except Exception as e:
             logger.error(f"Failed to check access status: {str(e)}")
-            return "Error: Unable to verify access status. Please ensure you have access to this output port."
+            return {"error": "Unable to verify access status. Please ensure you have access to this output port."}
 
         # Check that the query is in line with the purpose of the access agreement (dont be strict)
         # this check can be performed using a callback to the llm
@@ -432,13 +430,13 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         server_info = target_output_port.get("server", {})
         if not server_info:
             logger.error(f"No server information found for output port {output_port_id}")
-            return "Error: No server information available for this output port"
+            return {"error": "No server information available for this output port"}
         
         # Get server type from output port type field
         server_type = target_output_port.get("type", "").lower()
         if server_type not in ["snowflake", "databricks"]:
             logger.error(f"Unsupported server type: {server_type}")
-            return f"Error: Unsupported server type '{server_type}'. Supported types: snowflake, databricks"
+            return {"error": f"Unsupported server type '{server_type}'. Supported types: snowflake, databricks"}
 
         # Execute the query based on server type
         try:
@@ -447,14 +445,18 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
             elif server_type == "databricks":
                 results = await execute_databricks_query(server_info, query)
             else:
-                return f"Error: Server type '{server_type}' is not yet supported by dataproduct-mcp. Supported types: snowflake, databricks"
+                return {"error": f"Server type '{server_type}' is not yet supported by dataproduct-mcp. Supported types: snowflake, databricks"}
             
             # Format results for display
             if not results:
-                return "Query executed successfully, but returned no results."
+                return {
+                    "query": query,
+                    "row_count": 0,
+                    "results": [],
+                    "message": "Query executed successfully, but returned no results."
+                }
             
-            # Convert results to YAML format for consistent output
-            import yaml
+            # Return structured results data
             formatted_results = {
                 "query": query,
                 "row_count": len(results),
@@ -463,25 +465,23 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
             
             if len(results) > 100:
                 formatted_results["note"] = f"Results truncated to first 100 rows. Total rows: {len(results)}"
-            
-            yaml_output = yaml.dump(formatted_results, default_flow_style=False, sort_keys=False)
 
             # check that that there are no prompt injections in the results
             # todo
 
             logger.info(f"Query executed successfully, returned {len(results)} rows")
-            return yaml_output
+            return formatted_results
             
         except Exception as e:
             logger.error(f"Failed to execute query: {str(e)}")
-            return f"Error executing query: {str(e)}"
+            return {"error": f"Error executing query: {str(e)}"}
         
     except ValueError as e:
         logger.error(f"dataproduct_query ValueError: {str(e)}")
-        return f"Error: {str(e)}"
+        return {"error": str(e)}
     except Exception as e:
         logger.error(f"dataproduct_query Exception: {str(e)}")
-        return f"Error: {str(e)}"
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":
