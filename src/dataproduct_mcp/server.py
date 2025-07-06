@@ -16,89 +16,110 @@ mcp = FastMCP("datamesh-manager")
 
 
 @mcp.tool()
-async def dataproduct_list(
+async def dataproduct_search(
     search_term: Optional[str] = None,
-    archetype: Optional[str] = None,
-    status: Optional[str] = None
+    archetype: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
-    Lists all available Data Products.
-    
+    Search data products based on the search term. Only returns active data products.
+
     Args:
-        search_term: Search term to filter data products. Searches in the id, title, and description. 
-                    Multiple search terms are supported, separated by space.
+        search_term: Search term to filter data products. Multiple search terms are supported, separated by space.
         archetype: Filter for specific data product types. Typical values are: consumer-aligned, 
                   aggregate, source-aligned, application, dataconsumer
-        status: Filter for specific status, such as active
     """
-    logger.info(f"dataproduct_list called with search_term={search_term}, archetype={archetype}, status={status}")
+    logger.info(f"dataproduct_search called with search_term={search_term}, archetype={archetype}")
     
     try:
         client = DataMeshManagerClient()
-        data_products = await client.get_data_products(
-            query=search_term,
-            archetype=archetype,
-            status=status
-        )
+        formatted_products = []
         
-        if not data_products:
-            logger.info("dataproduct_list returned empty list")
+        # First, try the list endpoint (supports archetype and status filters)
+        try:
+            logger.info("Trying list endpoint first")
+            data_products = await client.get_data_products(
+                query=search_term,
+                archetype=archetype,
+                status="active"
+            )
+            
+            if data_products:
+                # Format results from list endpoint
+                for dp in data_products:
+                    formatted_product = {
+                        "id": dp.get("id", "N/A"),
+                        "name": dp.get("title") or dp.get("info", {}).get("title") or "N/A",
+                        "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
+                        "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A",
+                        "source": "simple_search"
+                    }
+                    formatted_products.append(formatted_product)
+                
+                logger.info(f"List endpoint returned {len(formatted_products)} data products")
+        
+        except Exception as e:
+            logger.warning(f"List endpoint failed: {str(e)}")
+        
+        # If no results from list endpoint or search_term provided, try semantic search
+        if (not formatted_products and search_term) or (search_term and not archetype):
+            try:
+                logger.info("Trying semantic search endpoint")
+                search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
+                search_data_products = search_results.get("results", [])
+                
+                # Add results from search endpoint (avoid duplicates)
+                existing_ids = {dp["id"] for dp in formatted_products}
+                
+                for dp in search_data_products:
+                    dp_id = dp.get("id", "N/A")
+                    if dp_id not in existing_ids:
+                        formatted_product = {
+                            "id": dp_id,
+                            "name": dp.get("name") or "N/A",
+                            "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
+                            "ownerId": dp.get("ownerId") or "N/A",
+                            "ownerName": dp.get("ownerName") or "N/A",
+                            "source": "semantic_search"
+                        }
+                        formatted_products.append(formatted_product)
+                
+                logger.info(f"Search endpoint added {len(search_data_products)} additional data products")
+            
+            except Exception as e:
+                logger.warning(f"Search endpoint failed: {str(e)}")
+        
+        # If still no results, try getting all active data products without search query
+        if not formatted_products:
+            try:
+                logger.info("No results from list or search endpoints, trying to get all active data products")
+                data_products = await client.get_data_products(
+                    query=None,
+                    archetype=archetype,
+                    status="active"
+                )
+                
+                if data_products:
+                    # Format results from fallback list endpoint
+                    for dp in data_products:
+                        formatted_product = {
+                            "id": dp.get("id", "N/A"),
+                            "name": dp.get("title") or dp.get("info", {}).get("title") or "N/A",
+                            "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
+                            "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A",
+                            "source": "all_data_products"
+                        }
+                        formatted_products.append(formatted_product)
+                    
+                    logger.info(f"Fallback list endpoint returned {len(formatted_products)} data products")
+            
+            except Exception as e:
+                logger.warning(f"Fallback list endpoint failed: {str(e)}")
+        
+        if not formatted_products:
+            logger.info("No data products found from any endpoint")
             return []
         
-        # Return structured list of data products
-        formatted_products = []
-        for dp in data_products:
-            formatted_product = {
-                "id": dp.get("id", "N/A"),
-                "name": dp.get("title") or dp.get("info", {}).get("title") or "N/A",
-                "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
-                "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A"
-            }
-            formatted_products.append(formatted_product)
-        
-        logger.info(f"dataproduct_list returned {len(formatted_products)} data products")
-        return formatted_products
-        
-    except ValueError as e:
-        logger.error(f"dataproduct_list ValueError: {str(e)}")
-        return [{"error": str(e)}]
-    except Exception as e:
-        logger.error(f"dataproduct_list Exception: {str(e)}")
-        return [{"error": f"Error fetching data products: {str(e)}"}]
-
-
-@mcp.tool()
-async def dataproduct_search(search_term: str) -> List[Dict[str, Any]]:
-    """
-    A semantic search for data products for a specific user question or use case.
-    
-    Args:
-        search_term: Search term to filter data products. Searches in the id, title, and description. Use simple search terms.            
-    """
-    logger.info(f"dataproduct_search called with search_term={search_term}")
-    
-    try:
-        client = DataMeshManagerClient()
-        search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
-        data_products = search_results.get("results", [])
-        
-        if not data_products:
-            logger.info("dataproduct_search returned empty list")
-            return []
-        
-        # Return structured list of data products
-        formatted_products = []
-        for dp in data_products:
-            formatted_product = {
-                "id": dp.get("id", "N/A"),
-                "name": dp.get("name") or "N/A",
-                "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
-                "ownerId": dp.get("ownerId") or "N/A",
-                "ownerName": dp.get("ownerName") or "N/A",
-            }
-            formatted_products.append(formatted_product)
-        
-        logger.info(f"dataproduct_search returned {len(formatted_products)} data products")
+        logger.info(f"dataproduct_search returned {len(formatted_products)} total data products")
         return formatted_products
         
     except ValueError as e:
