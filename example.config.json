@@ -1,0 +1,29 @@
+{
+    "mcpServers": {
+        "dataproduct": {
+            "command": "uv",
+            "args": [
+              "run", 
+              "--directory", "<path_to_folder>/dataproduct-mcp",
+              "python", "-m", "dataproduct_mcp.server"
+              ],
+            "env": {
+              "DATAMESH_MANAGER_API_KEY": ""
+            }
+        },
+        "snowflake": {
+          "command": "uvx",
+          "args": [
+            "--python=3.12",
+            "mcp_snowflake_server",
+            "--account", "",
+            "--warehouse", "COMPUTE_WH",
+            "--user", "",
+            "--password", "",
+            "--role", "",
+            "--database", "",
+            "--schema", ""
+          ]
+        }
+    }
+}
