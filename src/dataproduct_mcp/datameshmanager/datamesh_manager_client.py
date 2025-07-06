@@ -21,7 +21,28 @@ class DataMeshManagerClient:
         
         self.api_key = api_key or os.getenv("DATAMESH_MANAGER_API_KEY")
         if not self.api_key:
-            raise ValueError("API key is required. Set DATAMESH_MANAGER_API_KEY environment variable or pass api_key parameter.")
+            raise ValueError(
+                "DATAMESH_MANAGER_API_KEY is required but not found.\n\n"
+                "To set up your API key:\n"
+                "1. Go to Data Mesh Manager (https://app.datamesh-manager.com)\n"
+                "2. Select 'Organization Settings'\n"
+                "3. Go to 'API Keys'\n"
+                "4. Create a new API Key with scope 'User'\n"
+                "5. Copy the Secret API Key\n"
+                "6. Add DATAMESH_MANAGER_API_KEY to your MCP configuration environment variables\n\n"
+                "Example MCP configuration:\n"
+                "{\n"
+                '  "mcpServers": {\n'
+                '    "dataproduct": {\n'
+                '      "command": "uv",\n'
+                '      "args": ["run", "--directory", "<path_to_folder>/dataproduct-mcp", "python", "-m", "dataproduct_mcp.server"],\n'
+                '      "env": {\n'
+                '        "DATAMESH_MANAGER_API_KEY": "dmm_live_..."\n'
+                '      }\n'
+                '    }\n'
+                '  }\n'
+                "}"
+            )
         
         self.base_url = base_url.rstrip('/')
         self.headers = {
