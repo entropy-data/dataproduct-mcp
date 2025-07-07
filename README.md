@@ -2,6 +2,10 @@
 
 A Model Context Protocol (MCP) server for discovering data products and requesting access in [Data Mesh Manager](https://datamesh-manager.com/), and executing queries on the data platform to access business data.
 
+
+https://github.com/user-attachments/assets/5e4e69af-e6ac-42f4-a60b-4570a95050a5
+
+
 ## Concept
 
 > Idea: Enable AI agents to find and access any data product for semantic business context while enforcing data governance policies.
