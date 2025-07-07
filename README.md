@@ -46,7 +46,7 @@ Steps:
     - Required inputs:
       - `data_product_id` (string): The data product ID.
       - `output_port_id` (string): The output port ID.
-      - `purpose` (string): The specific purpose what the user is doing with the data and and reason why they need access. If the access request need to be approved by the data owner, the purpose is used by the data owner to decide if the access is eligable from a business, technical, and governance point of view.
+      - `purpose` (string): The specific purpose what the user is doing with the data and the reason why they need access. If the access request needs to be approved by the data owner, the purpose is used by the data owner to decide if the access is eligible from a business, technical, and governance point of view.
     - Returns: Access request details including access_id, status, and approval information
 
 4. `dataproduct_query`
@@ -59,7 +59,7 @@ Steps:
     
 ## Configuration
 
-Add this entry to your MCP client:
+Add this entry to your MCP client configuration:
 
 ```json
 {
@@ -85,7 +85,7 @@ Add this entry to your MCP client:
 }
 ```
 
-This is the format for Claude (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similiar config options.
+This is the format for Claude (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similar config options.
 
 In [Data Mesh Manager](https://www.datamesh-manager.com), create an API Key with scope "User (personal access token)".
 
@@ -96,7 +96,7 @@ Add the properties for Snowflake, Databricks, etc. as needed.
 
 ## Supported Server Types
 
-The `dataproduct_query` tool supports executing queries on data products. The MCP clients formulates SQL queries based on the data contract with its data model structure and semantics. 
+The `dataproduct_query` tool supports executing queries on data products. The MCP client formulates SQL queries based on the data contract with its data model structure and semantics. 
 
 The following server types are currently supported out-of-the-box:
 
