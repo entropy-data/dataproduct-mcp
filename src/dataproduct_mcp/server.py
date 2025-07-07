@@ -402,6 +402,10 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
         return {"error": str(e)}
 
 
-if __name__ == "__main__":
-    # Initialize and run the server
+def main():
+    """Entry point for the executable."""
     mcp.run(transport='stdio')
+
+
+if __name__ == "__main__":
+    main()

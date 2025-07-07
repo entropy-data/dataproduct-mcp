@@ -21,6 +21,9 @@ dev = [
     "pytest-asyncio>=0.21.0",
 ]
 
+[project.scripts]
+dataproduct_mcp = "dataproduct_mcp.server:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
