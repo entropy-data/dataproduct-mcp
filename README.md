@@ -10,9 +10,9 @@ or, if you prefer:
 
 > Enable AI to answer any business question.
 
-Data Products are managed high-quality business data sets shared with other teams within an organization and specified by data contracts. 
+[Data Products](https://www.datamesh-manager.com/learn/what-is-a-data-product) are managed high-quality business data sets shared with other teams within an organization and specified by data contracts. 
 Data contracts describe the structure, semantics, quality, and terms of use. Data products provide the semantic context AI needs to understand not just what data exists, but what it means and how to use it correctly. 
-We use Data Mesh Manager as a data product marketplace to search for available data products and evaluate if these are relevant for the task by analyzing its metadata. 
+We use [Data Mesh Manager](https://datamesh-manager.com/) as a data product marketplace to search for available data products and evaluate if these are relevant for the task by analyzing its metadata. 
 
 Once a data product is identified, data governance plays a crucial role in ensuring that access to data products is controlled, queries are in line with the data contract's terms of use, and its compliance with organizational global policies. If necessary, the AI agent can request access to the data product's output port, which may require manual approval from the data product owner.
 
@@ -26,6 +26,9 @@ Steps:
 2. **Governance:** Check and request access to data products
 3. **Query:** Use platform-specific MCP servers to execute SQL statements.
 
+**Data Mesh Manager** serves as the central data product marketplace and governance layer, providing metadata, access controls, and data contracts for all data products in your organization.
+
+**Data Platforms** (Snowflake, Databricks, etc.) host the actual data and execute queries. The MCP server connects to these platforms to run SQL queries against the data products you have access to.
 
 ## Tools
 
@@ -85,7 +88,7 @@ Add this entry to your MCP client configuration:
 }
 ```
 
-This is the format for Claude (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similar config options.
+This is the format for Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similar config options.
 
 In [Data Mesh Manager](https://www.datamesh-manager.com), create an API Key with scope "User (personal access token)".
 
