@@ -8,11 +8,15 @@
               "python", "-m", "dataproduct_mcp.server"
               ],
           "env": {
-            "DATAMESH_MANAGER_API_KEY": "dmm_live_user_SbyHMJWGjXvBfoit3yq614OFp07AWNuKe6QjNiICZhVlGqoAntNdstrj3j4VYBi7",
+            "DATAMESH_MANAGER_API_KEY": "dmm_live_user_...",
             "SNOWFLAKE_USER": "MY_SNOWFLAKE_USER_NAME",
             "SNOWFLAKE_PASSWORD": "MY_SNOWFLAKE_PASSWORD",
             "SNOWFLAKE_ROLE": "MY_SNOWFLAKE_ROLE",
-            "SNOWFLAKE_WAREHOUSE": "COMPUTE_WH"
+            "SNOWFLAKE_WAREHOUSE": "COMPUTE_WH",
+            "DATABRICKS_HOST": "adb-xxx.azuredatabricks.net",
+            "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/...",
+            "DATABRICKS_CLIENT_ID": "4e91dae3...",
+            "DATABRICKS_CLIENT_SECRET": "dose9de...."
           }
         }
     }

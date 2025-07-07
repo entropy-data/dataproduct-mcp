@@ -3,6 +3,8 @@ import logging
 import os
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from databricks.sdk.core import Config, oauth_service_principal
+from databricks import sql
 
 logger = logging.getLogger(__name__)
 
@@ -10,46 +12,32 @@ logger = logging.getLogger(__name__)
 class DatabricksClient:
     """Databricks database client for executing SQL queries."""
     
-    def __init__(self, connection_params: Dict[str, Any]):
-        self.connection_params = self._validate_and_clean_params(connection_params)
+    def __init__(self, server_hostname: str, http_path: str, client_id: str, client_secret: str, catalog: str = None, schema: str = None):
+        self.server_hostname = self._validate_required_param(server_hostname, "server_hostname")
+        self.http_path = self._validate_required_param(http_path, "http_path")
+        self.client_id = self._validate_required_param(client_id, "client_id")
+        self.client_secret = self._validate_required_param(client_secret, "client_secret")
+        self.catalog = catalog
+        self.schema = schema
         self.connection = None
         self.executor = ThreadPoolExecutor(max_workers=1)
         
-    def _validate_and_clean_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate and clean connection parameters."""
-        cleaned_params = {}
-        missing_params = []
-        
-        # Required parameters with user-friendly names
-        required_params = {
-            'server_hostname': 'Databricks server hostname',
-            'http_path': 'Databricks HTTP path (cluster/warehouse path)',
-            'access_token': 'Databricks access token'
-        }
-        
-        for param, description in required_params.items():
-            if param not in params or params[param] is None:
-                env_var = "DATABRICKS_ACCESS_TOKEN" if param == 'access_token' else f"DATABRICKS_{param.upper()}"
-                missing_params.append(f"• {description} (set via server info or {env_var} environment variable)")
-            else:
-                cleaned_params[param] = params[param]
-        
-        if missing_params:
-            env_vars = "Environment variables: DATABRICKS_ACCESS_TOKEN"
-            raise ValueError(
-                f"Missing required Databricks connection parameters:\n"
-                f"{chr(10).join(missing_params)}\n\n"
-                f"Please provide these either in the data product server configuration or as environment variables.\n"
-                f"{env_vars}"
+    def _validate_required_param(self, value: str, param_name: str) -> str:
+        """Validate required parameter."""
+        if not value or value is None:
+            raise ValueError(f"Missing required parameter: {param_name}")
+        return value
+    
+    def _create_credential_provider(self):
+        """Create OAuth service principal credential provider."""
+        def credential_provider():
+            config = Config(
+                host=f"https://{self.server_hostname}",
+                client_id=self.client_id,
+                client_secret=self.client_secret
             )
-        
-        # Optional parameters
-        optional_params = ['catalog', 'schema']
-        for param in optional_params:
-            if param in params and params[param] is not None:
-                cleaned_params[param] = params[param]
-        
-        return cleaned_params
+            return oauth_service_principal(config)
+        return credential_provider
     
     async def connect(self) -> None:
         """Establish Databricks connection."""
@@ -57,18 +45,24 @@ class DatabricksClient:
             return
             
         try:
-            from databricks import sql
-            
             logger.info("Connecting to Databricks...")
+            logger.info(f"Connection details - hostname: {self.server_hostname}, http_path: {self.http_path}, catalog: {self.catalog}, schema: {self.schema}, client_id: {self.client_id[:8]}***")
             loop = asyncio.get_event_loop()
+            credential_provider = self._create_credential_provider()
             self.connection = await loop.run_in_executor(
                 self.executor,
-                lambda: sql.connect(**self.connection_params)
+                lambda: sql.connect(
+                    server_hostname=self.server_hostname,
+                    http_path=self.http_path,
+                    credentials_provider=credential_provider,
+                    catalog=self.catalog,
+                    schema=self.schema
+                )
             )
             logger.info("Successfully connected to Databricks")
         except ImportError:
-            logger.error("databricks-sql-connector is not installed")
-            raise ValueError("databricks-sql-connector package is required for Databricks connections")
+            logger.error("databricks-sql-connector and databricks-sdk are not installed")
+            raise ValueError("databricks-sql-connector and databricks-sdk packages are required for Databricks connections")
         except Exception as e:
             logger.error(f"Failed to connect to Databricks: {str(e)}")
             raise
@@ -117,9 +111,17 @@ class DatabricksClient:
     @staticmethod
     def parse_connection_params(server_info: Dict[str, Any]) -> Dict[str, Any]:
         """Parse Databricks connection parameters from server info."""
-        server_hostname = server_info.get("hostname") or server_info.get("host")
-        http_path = server_info.get("http_path") or server_info.get("path")
-        access_token = server_info.get("access_token") or os.getenv("DATABRICKS_ACCESS_TOKEN")
+        server_hostname = server_info.get("hostname") or server_info.get("host") or os.getenv("DATABRICKS_HOST")
+        
+        # Clean hostname by removing https:// prefix and / suffix
+        if server_hostname:
+            if server_hostname.startswith("https://"):
+                server_hostname = server_hostname[8:]
+            if server_hostname.endswith("/"):
+                server_hostname = server_hostname[:-1]
+        http_path = server_info.get("http_path") or server_info.get("path") or os.getenv("DATABRICKS_HTTP_PATH")
+        client_id = server_info.get("client_id") or os.getenv("DATABRICKS_CLIENT_ID")
+        client_secret = server_info.get("client_secret") or os.getenv("DATABRICKS_CLIENT_SECRET")
         
         # Check for missing required parameters and provide setup instructions
         missing_params = []
@@ -127,21 +129,26 @@ class DatabricksClient:
         
         if not server_hostname:
             missing_params.append("• Databricks server hostname")
-        if not http_path:
+            env_instructions.append("export DATABRICKS_HOST=your_databricks_host")
+        if not http_path or not http_path.startswith("/"):
             missing_params.append("• Databricks HTTP path (cluster/warehouse path)")
-        if not access_token:
-            missing_params.append("• Databricks access token")
-            env_instructions.append("export DATABRICKS_ACCESS_TOKEN=your_access_token")
+            env_instructions.append("export DATABRICKS_HTTP_PATH=your_http_path")
+        if not client_id:
+            missing_params.append("• Databricks client ID")
+            env_instructions.append("export DATABRICKS_CLIENT_ID=your_client_id")
+        if not client_secret:
+            missing_params.append("• Databricks client secret")
+            env_instructions.append("export DATABRICKS_CLIENT_SECRET=your_client_secret")
         
         if missing_params:
             setup_msg = ""
             if env_instructions:
                 setup_msg = f"\n\nTo set up environment variables, run:\n{chr(10).join(env_instructions)}"
-                setup_msg += "\n\nTo get your Databricks access token:"
+                setup_msg += "\n\nTo get your Databricks OAuth credentials:"
                 setup_msg += "\n1. Go to your Databricks workspace"
                 setup_msg += "\n2. Click on your username in the top right"
-                setup_msg += "\n3. Select 'Settings' > 'Developer' > 'Access tokens'"
-                setup_msg += "\n4. Click 'Generate new token'"
+                setup_msg += "\n3. Select 'Settings' > 'Developer' > 'App connections'"
+                setup_msg += "\n4. Create a new OAuth app or use existing credentials"
             
             raise ValueError(
                 f"Missing required Databricks connection parameters:\n"
@@ -153,9 +160,10 @@ class DatabricksClient:
         return {
             "server_hostname": server_hostname,
             "http_path": http_path,
-            "access_token": access_token,
+            "client_id": client_id,
+            "client_secret": client_secret,
             "catalog": server_info.get("catalog"),
-            "schema": server_info.get("schema"),
+            "schema": server_info.get("schema")
         }
 
 
@@ -169,7 +177,14 @@ async def execute_databricks_query(server_info: Dict[str, Any], query: str) -> L
     connection_key = f"databricks_{hash(frozenset(connection_params.items()))}"
     
     if connection_key not in _databricks_connections:
-        _databricks_connections[connection_key] = DatabricksClient(connection_params)
+        _databricks_connections[connection_key] = DatabricksClient(
+            server_hostname=connection_params["server_hostname"],
+            http_path=connection_params["http_path"],
+            client_id=connection_params["client_id"],
+            client_secret=connection_params["client_secret"],
+            catalog=connection_params.get("catalog"),
+            schema=connection_params.get("schema")
+        )
     
     client = _databricks_connections[connection_key]
     return await client.execute_query(query)

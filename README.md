@@ -62,13 +62,13 @@ The `dataproduct_query` tool supports executing queries on data products. The MC
 
 The following server types are currently supported out-of-the-box:
 
- | Server Type | Status      | Notes                                                                                                  |
- |-------------|-------------|--------------------------------------------------------------------------------------------------------|
- | Snowflake   | ✅           | Requires SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE environment variables |
- | Databricks  | ✅           |                                                                                                        |
- | S3          | Coming soon | Implemented through DuckDB client                                                                      |
- | BigQuery    | Coming soon |                                                                                                        |
- | Fabric      | Coming soon |                                                                                                        |
+ | Server Type | Status      | Notes                                                                                                                |
+ |-------------|-------------|----------------------------------------------------------------------------------------------------------------------|
+ | Snowflake   | ✅           | Requires SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE environment variables               |
+ | Databricks  | ✅           | Requires DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_CLIENT_ID, DATABRICKS_CLIENT_SECRET environment variables |
+ | S3          | Coming soon | Implemented through DuckDB client                                                                                    |
+ | BigQuery    | Coming soon |                                                                                                                      |
+ | Fabric      | Coming soon |                                                                                                                      |
  
  > **Note:** Use additional Platform-specific MCP servers for other data platform types (e.g., BigQuery, Redshift, PostgreSQL) by adding them to your MCP client.
 

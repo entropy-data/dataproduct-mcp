@@ -1,6 +1,12 @@
 import pytest
 import os
-from dataproduct_mcp.server import dataproduct_get, dataproduct_list, datacontract_get, dataproduct_search
+from unittest.mock import AsyncMock
+
+# Import from src directory
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from dataproduct_mcp.server import dataproduct_get, dataproduct_search
 
 
 class TestIntegration:
@@ -13,11 +19,20 @@ class TestIntegration:
         if not api_key:
             pytest.skip("DATAMESH_MANAGER_API_KEY environment variable not set - skipping integration tests")
     
+    @pytest.fixture
+    def mock_context(self):
+        """Create a mock context for testing."""
+        ctx = AsyncMock()
+        ctx.info = AsyncMock()
+        ctx.warning = AsyncMock()
+        ctx.error = AsyncMock()
+        return ctx
+
     @pytest.mark.asyncio
-    async def test_dataproduct_get_real_api_call(self):
+    async def test_dataproduct_get_real_api_call(self, mock_context):
         """Test dataproduct_get with a real API call."""
         # First get a list of available data products to find a valid ID
-        products = await dataproduct_list()
+        products = await dataproduct_search(mock_context)
         
         # Skip if no products available
         if not products or len(products) == 0:
@@ -29,13 +44,11 @@ class TestIntegration:
             pytest.skip("No valid product ID found in the first product")
         
         # Test getting the specific data product
-        result = await dataproduct_get(product_id)
+        result = await dataproduct_get(mock_context, product_id)
         
         # Verify the result
-        assert isinstance(result, str)
-        assert len(result) > 0
-        assert product_id in result
-        
-        # Should contain YAML-like structure
-        assert "id:" in result or "title:" in result
-    
+        assert isinstance(result, dict)
+        assert "id" in result
+        assert result["id"] == product_id
+
+
