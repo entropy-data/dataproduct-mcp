@@ -6,6 +6,10 @@ A Model Context Protocol (MCP) server for discovering data products and requesti
 
 > Idea: Enable AI agents to find and access any data product for semantic business context while enforcing data governance policies.
 
+or, if you prefer:
+
+> Enable AI to answer any business question.
+
 Data Products are managed high-quality business data sets shared with other teams within an organization and specified by data contracts. 
 Data contracts describe the structure, semantics, quality, and terms of use. Data products provide the semantic context AI needs to understand not just what data exists, but what it means and how to use it correctly. 
 We use Data Mesh Manager as a data product marketplace to search for available data products and evaluate if these are relevant for the task by analyzing its metadata. 
@@ -55,9 +59,40 @@ Steps:
     
 ## Configuration
 
-TBD
+Add this entry to your MCP client:
 
-(add DXT and MCP server configuration here)
+```json
+{
+  "mcpServers": {
+    "dataproduct": {
+      "command": "uvx",
+      "args": [
+        "dataproduct_mcp"
+      ],
+      "env": {
+        "DATAMESH_MANAGER_API_KEY": "dmm_live_user_...",
+        "SNOWFLAKE_USER": "",
+        "SNOWFLAKE_PASSWORD": "",
+        "SNOWFLAKE_ROLE": "",
+        "SNOWFLAKE_WAREHOUSE": "COMPUTE_WH",
+        "DATABRICKS_HOST": "adb-xxx.azuredatabricks.net",
+        "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/xxx",
+        "DATABRICKS_CLIENT_ID": "",
+        "DATABRICKS_CLIENT_SECRET": ""
+      }
+    }
+  }
+}
+```
+
+This is the format for Claude (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similiar config options.
+
+In [Data Mesh Manager](https://www.datamesh-manager.com), create an API Key with scope "User (personal access token)".
+
+Add the properties for Snowflake, Databricks, etc. as needed.
+
+(Yes, we will work on OAuth2 based authentication to get rid of these access tokens)
+
 
 ## Supported Server Types
 
@@ -76,51 +111,10 @@ The following server types are currently supported out-of-the-box:
  > **Note:** Use additional Platform-specific MCP servers for other data platform types (e.g., BigQuery, Redshift, PostgreSQL) by adding them to your MCP client.
 
 
-## Development Setup
+## Contributing
 
-### Install dependencies
-
-```bash
-uv sync --extra dev
-uv pip install -e .
-```
-
-### Run all tests
-```bash
-uv run pytest
-```
-
-### Use in Claude Desktop (Dev Mode)
-
-Open `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-Add this entry:
-
-```
-{
-  "mcpServers": {
-    "dataproduct": {
-      "command": "uv",
-      "args": [
-        "run", 
-        "--directory", "<path_to_folder>/dataproduct-mcp", 
-        "python", "-m", "dataproduct_mcp.server"
-        ],
-      "env": {
-        "DATAMESH_MANAGER_API_KEY": "dmm_live_..."
-      }
-    }
-  }
-}
-```
-
-### Use with MCP Inspector
-
-```
-npx @modelcontextprotocol/inspector --config example.config.json --server dataproduct
-```
-
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
 
 ## Credits
 
-Created by [Simon Harrer](https://www.linkedin.com/in/simonharrer/), [André Deuerling](https://www.linkedin.com/in/andre-deuerling/), and [Jochen Christ](https://www.linkedin.com/in/jochenchrist/).
+Maintained by [Simon Harrer](https://www.linkedin.com/in/simonharrer/), [André Deuerling](https://www.linkedin.com/in/andre-deuerling/), and [Jochen Christ](https://www.linkedin.com/in/jochenchrist/).
