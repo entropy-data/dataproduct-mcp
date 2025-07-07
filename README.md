@@ -3,7 +3,7 @@
 A Model Context Protocol (MCP) server for discovering data products and requesting access in [Data Mesh Manager](https://datamesh-manager.com/), and executing queries on the data platform to access business data.
 
 
-https://github.com/user-attachments/assets/5e4e69af-e6ac-42f4-a60b-4570a95050a5
+https://github.com/user-attachments/assets/8c8cd04d-33f6-4e33-856f-6141a41af2bb
 
 
 ## Concept
