@@ -34,13 +34,7 @@ Steps:
       - `data_product_id` (string): The data product ID.
     - Returns: Data product details with enhanced output ports, including access status and inlined data contracts
 
-3. `datacontract_get`
-    - Get a data contract by its ID.
-    - Required inputs:
-      - `data_contract_id` (string): The data contract ID.
-    - Returns: Data contract details as structured data
-
-4. `dataproduct_request_access`
+3. `dataproduct_request_access`
     - Request access to a specific output port of a data product. This creates an access request. Based on the data product configuration, purpose, and data governance rules, the access will be automatically granted, or it will be reviewed by the data product owner.
     - Required inputs:
       - `data_product_id` (string): The data product ID.
@@ -48,7 +42,7 @@ Steps:
       - `purpose` (string): The specific purpose what the user is doing with the data and and reason why they need access. If the access request need to be approved by the data owner, the purpose is used by the data owner to decide if the access is eligable from a business, technical, and governance point of view.
     - Returns: Access request details including access_id, status, and approval information
 
-5. `dataproduct_query`
+4. `dataproduct_query`
     - Execute a SQL query on a data product's output port. This tool connects to the underlying data platform and executes the provided SQL query. You must have active access to the output port to execute queries.
     - Required inputs:
       - `data_product_id` (string): The data product ID.

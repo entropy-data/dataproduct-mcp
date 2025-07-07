@@ -50,28 +50,12 @@ You are connected to the Data Product MCP server, which provides access to organ
 - **Supports**: Snowflake and Databricks platforms
 - **Returns**: Query results as structured data (limited to 100 rows)
 
-### 5. datacontract_get
-- **Purpose**: Get standalone data contract details
-- **Parameters**: `data_contract_id` (required)
-- **Note**: Usually not needed since dataproduct_get now inlines contracts
-
 ## Typical Workflow
 
 1. **Discover**: Use `dataproduct_search` to find relevant data products
 2. **Evaluate**: Use `dataproduct_get` to understand structure, access status, and schemas
 3. **Request Access**: Use `dataproduct_request_access` if you don't have active access
 4. **Query Data**: Use `dataproduct_query` to execute SQL queries once you have access for typical server types. For other server types, you may need to use server-specific tools.
-
-## Data Governance
-- Only active data products are returned
-- Access requests may require business justification
-- All queries are subject to data governance policies
-- Respect data contracts' terms of use
-
-## Environment Setup
-For database connections, you may need to set environment variables:
-- Snowflake: SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE
-- Databricks: DATABRICKS_ACCESS_TOKEN
     """
 )
 
@@ -254,38 +238,6 @@ async def dataproduct_get(ctx: Context, data_product_id: str) -> Dict[str, Any]:
         return {"error": f"Error fetching data product: {str(e)}"}
 
 
-@mcp.tool()
-async def datacontract_get(ctx: Context, data_contract_id: str) -> Dict[str, Any]:
-    """
-    Get a data contract by its ID.
-    
-    Args:
-        data_contract_id: The data contract ID.
-        
-    Returns:
-        Dict containing the data contract details, or error object.
-    """
-    await ctx.info(f"datacontract_get called with data_contract_id={data_contract_id}")
-    
-    try:
-        client = DataMeshManagerClient()
-        data_contract = await client.get_data_contract(data_contract_id)
-        
-        if not data_contract:
-            await ctx.info(f"datacontract_get: data contract {data_contract_id} not found")
-            return {"error": "Data contract not found"}
-        
-        # Return the data contract directly as structured data
-        await ctx.info(f"datacontract_get successfully retrieved data contract {data_contract_id}")
-        return data_contract
-        
-    except ValueError as e:
-        await ctx.error(f"datacontract_get ValueError: {str(e)}")
-        return {"error": str(e)}
-    except Exception as e:
-        await ctx.error(f"datacontract_get Exception: {str(e)}")
-        return {"error": f"Error fetching data contract: {str(e)}"}
-
 
 @mcp.tool()
 async def dataproduct_request_access(ctx: Context, data_product_id: str, output_port_id: str, purpose: str) -> Dict[str, Any]:
@@ -384,7 +336,7 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
             await ctx.error(f"Failed to check access status: {str(e)}")
             return {"error": "Unable to verify access status. Please ensure you have access to this output port."}
 
-        # Check that the query is in line with the purpose of the access agreement (dont be strict)
+        # Check that the query is in line with the purpose of the access agreement, and the data contract terms (dont be strict)
         # this check can be performed using a callback to the llm
         # todo
 
