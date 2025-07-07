@@ -18,6 +18,23 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Validate release tag matches version
+        run: |
+          # Extract version from pyproject.toml
+          PROJECT_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          # Extract tag from GitHub ref
+          RELEASE_TAG=${GITHUB_REF#refs/tags/}
+          
+          echo "Project version: $PROJECT_VERSION"
+          echo "Release tag: $RELEASE_TAG"
+          
+          if [ "$PROJECT_VERSION" != "$RELEASE_TAG" ]; then
+            echo "Error: Release tag ($RELEASE_TAG) does not match project version ($PROJECT_VERSION)"
+            exit 1
+          fi
+          
+          echo "Release tag matches project version ✓"
+
       - name: Build release distributions
         run: |
           # NOTE: put your own distribution build steps here.
