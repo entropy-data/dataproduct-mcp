@@ -1,15 +1,11 @@
 from typing import Any, List, Dict, Optional
-import logging
-from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP, Context
 from dotenv import load_dotenv
 from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
 from .connections.snowflake_client import execute_snowflake_query
 from .connections.databricks_client import execute_databricks_query
 
 load_dotenv()
-
-# Set up logging
-logger = logging.getLogger(__name__)
 
 # Initialize FastMCP server
 mcp = FastMCP(
@@ -82,6 +78,7 @@ For database connections, you may need to set environment variables:
 
 @mcp.tool()
 async def dataproduct_search(
+    ctx: Context,
     search_term: Optional[str] = None,
     archetype: Optional[str] = None
 ) -> List[Dict[str, Any]]:
@@ -96,7 +93,7 @@ async def dataproduct_search(
     Returns:
         List of data product summaries with basic information, or list with error object.
     """
-    logger.info(f"dataproduct_search called with search_term={search_term}, archetype={archetype}")
+    await ctx.info(f"dataproduct_search called with search_term={search_term}, archetype={archetype}")
     
     try:
         client = DataMeshManagerClient()
@@ -104,7 +101,7 @@ async def dataproduct_search(
         
         # First, try the list endpoint (supports archetype and status filters)
         try:
-            logger.info("Trying list endpoint first")
+            await ctx.info("Trying list endpoint first")
             data_products = await client.get_data_products(
                 query=search_term,
                 archetype=archetype,
@@ -123,15 +120,15 @@ async def dataproduct_search(
                     }
                     results.append(formatted_product)
                 
-                logger.info(f"List endpoint returned {len(results)} data products")
+                await ctx.info(f"List endpoint returned {len(results)} data products")
         
         except Exception as e:
-            logger.warning(f"List endpoint failed: {str(e)}")
+            await ctx.warning(f"List endpoint failed: {str(e)}")
         
         # If no results from list endpoint or search_term provided, try semantic search
         if (not results and search_term) or (search_term and not archetype):
             try:
-                logger.info("Trying semantic search endpoint")
+                await ctx.info("Trying semantic search endpoint")
                 search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
                 search_data_products = search_results.get("results", [])
                 
@@ -151,55 +148,28 @@ async def dataproduct_search(
                         }
                         results.append(formatted_product)
                 
-                logger.info(f"Search endpoint added {len(search_data_products)} additional data products")
+                await ctx.info(f"Search endpoint added {len(search_data_products)} additional data products")
             
             except Exception as e:
-                logger.warning(f"Search endpoint failed: {str(e)}")
-        
-        # If still no results, try getting all active data products without search query
+                await ctx.warning(f"Search endpoint failed: {str(e)}")
+
         if not results:
-            try:
-                logger.info("No results from list or search endpoints, trying to get all active data products")
-                data_products = await client.get_data_products(
-                    query=None,
-                    archetype=archetype,
-                    status="active"
-                )
-                
-                if data_products:
-                    # Format results from fallback list endpoint
-                    for dp in data_products:
-                        formatted_product = {
-                            "id": dp.get("id", "N/A"),
-                            "name": dp.get("title") or dp.get("info", {}).get("title") or "N/A",
-                            "description": dp.get("description") or dp.get("info", {}).get("description") or "N/A",
-                            "owner": dp.get("owner") or dp.get("info", {}).get("owner") or "N/A",
-                            "source": "all_data_products"
-                        }
-                        results.append(formatted_product)
-                    
-                    logger.info(f"Fallback list endpoint returned {len(results)} data products")
-            
-            except Exception as e:
-                logger.warning(f"Fallback list endpoint failed: {str(e)}")
-        
-        if not results:
-            logger.info("No data products found from any endpoint")
+            await ctx.info("No data products found matching your search criteria")
             return []
         
-        logger.info(f"dataproduct_search returned {len(results)} total data products")
+        await ctx.info(f"dataproduct_search returned {len(results)} total data products")
         return results
         
     except ValueError as e:
-        logger.error(f"dataproduct_search ValueError: {str(e)}")
+        await ctx.error(f"dataproduct_search ValueError: {str(e)}")
         return [{"error": str(e)}]
     except Exception as e:
-        logger.error(f"dataproduct_search Exception: {str(e)}")
+        await ctx.error(f"dataproduct_search Exception: {str(e)}")
         return [{"error": f"Error searching data products: {str(e)}"}]
 
 
 @mcp.tool()
-async def dataproduct_get(data_product_id: str) -> Dict[str, Any]:
+async def dataproduct_get(ctx: Context, data_product_id: str) -> Dict[str, Any]:
     """
     Get a data product by its ID. The data product contains all its output ports and server information.
     The response includes access status for each output port and inlines any data contracts.
@@ -210,14 +180,14 @@ async def dataproduct_get(data_product_id: str) -> Dict[str, Any]:
     Returns:
         Dict containing the data product details with enhanced output ports, or error object.
     """
-    logger.info(f"dataproduct_get called with data_product_id={data_product_id}")
+    await ctx.info(f"dataproduct_get called with data_product_id={data_product_id}")
     
     try:
         client = DataMeshManagerClient()
         data_product = await client.get_data_product(data_product_id)
         
         if not data_product:
-            logger.info(f"dataproduct_get: data product {data_product_id} not found")
+            await ctx.info(f"dataproduct_get: data product {data_product_id} not found")
             return {"error": "Data product not found"}
         
         # todo make null safe
@@ -229,7 +199,7 @@ async def dataproduct_get(data_product_id: str) -> Dict[str, Any]:
             try:
                 output_port_id = output_port.get("id")
                 if output_port_id:
-                    logger.info(f"Checking access status for output port {output_port_id}")
+                    await ctx.info(f"Checking access status for output port {output_port_id}")
                     access_status = await client.get_access_status(data_product_id, output_port_id)
 
                     # Set output_port["accessStatus"] based on the result of access_status
@@ -245,51 +215,51 @@ async def dataproduct_get(data_product_id: str) -> Dict[str, Any]:
                     elif lifecycle_status == "upcoming":
                         output_port["accessStatus"] = f"Your access is upcoming (status: {access_status_value}, lifecycle: {lifecycle_status}). You may not access the data directly for data governance reasons without an approved access request."
                     elif lifecycle_status == "active":
-                        output_port["accessStatus"] = f"You have access to this output port (status: {access_status_value}, lifecycle: {lifecycle_status})"
+                        output_port["accessStatus"] = f"You already have access to this output port (status: {access_status_value}, lifecycle: {lifecycle_status})"
                     elif lifecycle_status == "expired":
                         output_port["accessStatus"] = f"Your access request is expired (status: {access_status_value}, lifecycle: {lifecycle_status})"
                     else:
                         output_port["accessStatus"] = f"Access status: {access_status_value}, lifecycle: {lifecycle_status}"
 
-                    logger.info(f"Added access status for output port {output_port_id}")
+                    await ctx.info(f"Added access status for output port {output_port_id}")
                 else:
-                    logger.warning(f"Output port missing externalId/id, skipping access status")
+                    await ctx.warning(f"Output port missing externalId/id, skipping access status")
                     output_port["accessStatus"] = None
             except Exception as e:
-                logger.warning(f"Failed to get access status for output port {output_port.get('externalId', 'unknown')}: {str(e)}")
+                await ctx.warning(f"Failed to get access status for output port {output_port.get('externalId', 'unknown')}: {str(e)}")
                 output_port["accessStatus"] = None
             
             # Resolve and inline data contract if dataContractId exists
             data_contract_id = output_port.get("dataContractId")
             if data_contract_id:
                 try:
-                    logger.info(f"Resolving data contract {data_contract_id} for output port {output_port.get('id', 'unknown')}")
+                    await ctx.info(f"Resolving data contract {data_contract_id} for output port {output_port.get('id', 'unknown')}")
                     data_contract = await client.get_data_contract(data_contract_id)
                     
                     if data_contract:
                         output_port["dataContract"] = data_contract
-                        logger.info(f"Successfully inlined data contract {data_contract_id}")
+                        await ctx.info(f"Successfully inlined data contract {data_contract_id}")
                     else:
-                        logger.warning(f"Data contract {data_contract_id} not found")
+                        await ctx.warning(f"Data contract {data_contract_id} not found")
                         output_port["dataContract"] = None
                 except Exception as e:
-                    logger.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
+                    await ctx.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
                     output_port["dataContract"] = None
         
         # Return the enhanced data product directly as structured data
-        logger.info(f"dataproduct_get successfully retrieved data product {data_product_id} with access status")
+        await ctx.info(f"dataproduct_get successfully retrieved data product {data_product_id} with access status")
         return data_product
         
     except ValueError as e:
-        logger.error(f"dataproduct_get ValueError: {str(e)}")
+        await ctx.error(f"dataproduct_get ValueError: {str(e)}")
         return {"error": str(e)}
     except Exception as e:
-        logger.error(f"dataproduct_get Exception: {str(e)}")
+        await ctx.error(f"dataproduct_get Exception: {str(e)}")
         return {"error": f"Error fetching data product: {str(e)}"}
 
 
 @mcp.tool()
-async def datacontract_get(data_contract_id: str) -> Dict[str, Any]:
+async def datacontract_get(ctx: Context, data_contract_id: str) -> Dict[str, Any]:
     """
     Get a data contract by its ID.
     
@@ -299,30 +269,30 @@ async def datacontract_get(data_contract_id: str) -> Dict[str, Any]:
     Returns:
         Dict containing the data contract details, or error object.
     """
-    logger.info(f"datacontract_get called with data_contract_id={data_contract_id}")
+    await ctx.info(f"datacontract_get called with data_contract_id={data_contract_id}")
     
     try:
         client = DataMeshManagerClient()
         data_contract = await client.get_data_contract(data_contract_id)
         
         if not data_contract:
-            logger.info(f"datacontract_get: data contract {data_contract_id} not found")
+            await ctx.info(f"datacontract_get: data contract {data_contract_id} not found")
             return {"error": "Data contract not found"}
         
         # Return the data contract directly as structured data
-        logger.info(f"datacontract_get successfully retrieved data contract {data_contract_id}")
+        await ctx.info(f"datacontract_get successfully retrieved data contract {data_contract_id}")
         return data_contract
         
     except ValueError as e:
-        logger.error(f"datacontract_get ValueError: {str(e)}")
+        await ctx.error(f"datacontract_get ValueError: {str(e)}")
         return {"error": str(e)}
     except Exception as e:
-        logger.error(f"datacontract_get Exception: {str(e)}")
+        await ctx.error(f"datacontract_get Exception: {str(e)}")
         return {"error": f"Error fetching data contract: {str(e)}"}
 
 
 @mcp.tool()
-async def dataproduct_request_access(data_product_id: str, output_port_id: str, purpose: str) -> Dict[str, Any]:
+async def dataproduct_request_access(ctx: Context, data_product_id: str, output_port_id: str, purpose: str) -> Dict[str, Any]:
     """
     Request access to a specific output port of a data product.
     This creates an access request. Based on the data product configuration, purpose, and data governance rules,
@@ -331,12 +301,12 @@ async def dataproduct_request_access(data_product_id: str, output_port_id: str, 
     Args:
         data_product_id: The ID of the data product.
         output_port_id: The ID of the output port to request access to.
-        purpose: The business purpose/reason for requesting access to this data.
+        purpose: The business purpose/reason for requesting access to this data. Use a high-level description of why you need this data.
         
     Returns:
         Dict containing access request details including access_id, status, and approval information, or error object.
     """
-    logger.info(f"dataproduct_request_access called with data_product_id={data_product_id}, output_port_id={output_port_id}, purpose={purpose}")
+    await ctx.info(f"dataproduct_request_access called with data_product_id={data_product_id}, output_port_id={output_port_id}, purpose={purpose}")
     
     try:
         client = DataMeshManagerClient()
@@ -357,19 +327,19 @@ async def dataproduct_request_access(data_product_id: str, output_port_id: str, 
             "message": "Access granted automatically! You now have access to this data product output port using the server details and can start using the data immediately." if auto_approved else f"Access request submitted successfully and is now {result.status}. You will be notified when the data product owner reviews your request. You can check the status in dataproduct details in the output port."
         }
         
-        logger.info(f"dataproduct_request_access successfully submitted for data_product_id={data_product_id}, access_id={result.access_id}, status={result.status}")
+        await ctx.info(f"dataproduct_request_access successfully submitted for data_product_id={data_product_id}, access_id={result.access_id}, status={result.status}")
         return response
         
     except ValueError as e:
-        logger.error(f"dataproduct_request_access ValueError: {str(e)}")
+        await ctx.error(f"dataproduct_request_access ValueError: {str(e)}")
         return {"error": str(e)}
     except Exception as e:
-        logger.error(f"dataproduct_request_access Exception: {str(e)}")
+        await ctx.error(f"dataproduct_request_access Exception: {str(e)}")
         return {"error": f"Error requesting access: {str(e)}"}
 
 
 @mcp.tool()
-async def dataproduct_query(data_product_id: str, output_port_id: str, query: str) -> Dict[str, Any]:
+async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: str, query: str) -> Dict[str, Any]:
     """
     Execute a SQL query on a data product's output port.
     This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
@@ -383,7 +353,7 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
     Returns:
         Dict containing query results with row count and data (limited to 100 rows), or error object.
     """
-    logger.info(f"dataproduct_query called with data_product_id={data_product_id}, output_port_id={output_port_id}")
+    await ctx.info(f"dataproduct_query called with data_product_id={data_product_id}, output_port_id={output_port_id}")
     
     try:
         # First, get the data product details to retrieve server information
@@ -391,7 +361,7 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         data_product = await client.get_data_product(data_product_id)
         
         if not data_product:
-            logger.error(f"Data product {data_product_id} not found")
+            await ctx.error(f"Data product {data_product_id} not found")
             return {"error": "Data product not found"}
         
         # Find the specified output port
@@ -404,7 +374,7 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
                 break
         
         if not target_output_port:
-            logger.error(f"Output port {output_port_id} not found in data product {data_product_id}")
+            await ctx.error(f"Output port {output_port_id} not found in data product {data_product_id}")
             return {"error": "Output port not found"}
         
         # Check access status
@@ -412,10 +382,10 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
             access_status = await client.get_access_status(data_product_id, output_port_id)
             if not access_status or access_status.access_lifecycle_status != "active":
                 current_status = access_status.access_lifecycle_status if access_status else "unknown"
-                logger.error(f"No active access to output port {output_port_id}, current status: {current_status}")
+                await ctx.error(f"No active access to output port {output_port_id}, current status: {current_status}")
                 return {"error": f"You do not have active access to this output port. Current access status: {current_status}. Please request access first using dataproduct_request_access."}
         except Exception as e:
-            logger.error(f"Failed to check access status: {str(e)}")
+            await ctx.error(f"Failed to check access status: {str(e)}")
             return {"error": "Unable to verify access status. Please ensure you have access to this output port."}
 
         # Check that the query is in line with the purpose of the access agreement (dont be strict)
@@ -429,13 +399,13 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
         # Get server information and type
         server_info = target_output_port.get("server", {})
         if not server_info:
-            logger.error(f"No server information found for output port {output_port_id}")
+            await ctx.error(f"No server information found for output port {output_port_id}")
             return {"error": "No server information available for this output port"}
         
         # Get server type from output port type field
         server_type = target_output_port.get("type", "").lower()
         if server_type not in ["snowflake", "databricks"]:
-            logger.error(f"Unsupported server type: {server_type}")
+            await ctx.error(f"Unsupported server type: {server_type}")
             return {"error": f"Unsupported server type '{server_type}'. Supported types: snowflake, databricks"}
 
         # Execute the query based on server type
@@ -469,29 +439,21 @@ async def dataproduct_query(data_product_id: str, output_port_id: str, query: st
             # check that that there are no prompt injections in the results
             # todo
 
-            logger.info(f"Query executed successfully, returned {len(results)} rows")
+            await ctx.info(f"Query executed successfully, returned {len(results)} rows")
             return formatted_results
             
         except Exception as e:
-            logger.error(f"Failed to execute query: {str(e)}")
+            await ctx.error(f"Failed to execute query: {str(e)}")
             return {"error": f"Error executing query: {str(e)}"}
         
     except ValueError as e:
-        logger.error(f"dataproduct_query ValueError: {str(e)}")
+        await ctx.error(f"dataproduct_query ValueError: {str(e)}")
         return {"error": str(e)}
     except Exception as e:
-        logger.error(f"dataproduct_query Exception: {str(e)}")
+        await ctx.error(f"dataproduct_query Exception: {str(e)}")
         return {"error": str(e)}
 
 
 if __name__ == "__main__":
-    # Set up logging configuration
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    logger.info("Starting DataMesh Manager MCP server")
-    
     # Initialize and run the server
     mcp.run(transport='stdio')
