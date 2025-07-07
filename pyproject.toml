@@ -21,6 +21,11 @@ dev = [
     "pytest-asyncio>=0.21.0",
 ]
 
+[tool.dxt]
+#bundle = "pip install . --target dxt/server/lib --upgrade --force-reinstall && cp manifest.json dxt/manifest.json"
+bundle = "uv sync --directory dxt"
+pack = "npx--workspace dxt  @anthropic-ai/dxt pack "
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

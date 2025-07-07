@@ -1,0 +1,60 @@
+{
+  "dxt_version": "0.1",
+  "name": "dataproduct-mcp",
+  "display_name": "Data Product MCP Server",
+  "version": "1.0.0",
+  "description": "A Model Context Protocol (MCP) server for discovering data products and requesting access in Data Mesh Manager, and executing queries on the data platform to access business data.",
+  "author": {
+    "name": "Entropy Data",
+    "email": "hello@entropy-data.com",
+    "url": "https://github.com/entropy-data/dataproduct-mcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/entropy-data/dataproduct-mcp"
+  },
+  "homepage": "https://github.com/entropy-data/dataproduct-mcp",
+  "documentation": "https://github.com/entropy-data/dataproduct-mcp",
+  "server": {
+    "type": "python",
+    "entry_point": "dataproduct_mcp.server",
+    "mcp_config": {
+      "command": "python3",
+      "args": [
+        "-m", "dataproduct_mcp.server"
+      ],
+      "env": {
+        "PYTHONPATH": "${__dirname}/server/lib"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "dataproduct_search",
+      "description": "Search data products based on search terms. Only returns active data products."
+    },
+    {
+      "name": "dataproduct_get",
+      "description": "Get detailed information about a specific data product including output ports and access status."
+    },
+    {
+      "name": "dataproduct_request_access",
+      "description": "Request access to a specific output port of a data product."
+    },
+    {
+      "name": "dataproduct_query",
+      "description": "Execute SQL queries on data product output ports (requires active access)."
+    }
+  ],
+  "keywords": ["data", "mesh", "governance", "sql", "analytics", "snowflake", "databricks", "data-products"],
+  "license": "MIT",
+  "user_config": {
+    "DATAMESH_MANAGER_API_KEY": {
+      "type": "string",
+      "title": "Data Mesh Manager API Key",
+      "description": "The API Key with User scope",
+      "required": true,
+      "sensitive": true
+    }
+  }
+}
