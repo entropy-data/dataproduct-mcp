@@ -79,21 +79,18 @@ For database connections, you may need to set environment variables:
 @mcp.tool()
 async def dataproduct_search(
     ctx: Context,
-    search_term: Optional[str] = None,
-    archetype: Optional[str] = None
+    search_term: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """
     Search data products based on the search term. Only returns active data products.
 
     Args:
         search_term: Search term to filter data products. Multiple search terms are supported, separated by space.
-        archetype: Filter for specific data product types. Typical values are: consumer-aligned, 
-                  aggregate, source-aligned, application, dataconsumer
                   
     Returns:
         List of data product summaries with basic information, or list with error object.
     """
-    await ctx.info(f"dataproduct_search called with search_term={search_term}, archetype={archetype}")
+    await ctx.info(f"dataproduct_search called with search_term={search_term}")
     
     try:
         client = DataMeshManagerClient()
@@ -104,7 +101,6 @@ async def dataproduct_search(
             await ctx.info("Trying list endpoint first")
             data_products = await client.get_data_products(
                 query=search_term,
-                archetype=archetype,
                 status="active"
             )
             
@@ -126,7 +122,7 @@ async def dataproduct_search(
             await ctx.warning(f"List endpoint failed: {str(e)}")
         
         # If no results from list endpoint or search_term provided, try semantic search
-        if (not results and search_term) or (search_term and not archetype):
+        if not results and search_term:
             try:
                 await ctx.info("Trying semantic search endpoint")
                 search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
