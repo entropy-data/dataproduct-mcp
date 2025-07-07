@@ -7,11 +7,14 @@ A Model Context Protocol (MCP) server for discovering data products and requesti
 > Idea: Enable AI agents to find and access any data product for semantic business context while enforcing data governance policies.
 
 Data Products are managed high-quality business data sets shared with other teams within an organization and specified by data contracts. 
-Data contracts describe the structure, semantics, quality, and terms of use. Data products provide the semantic context AI needs to understand not just what data exists, but what it means and how to use it correctly. They are a perfect fit for AI agents to _discover_ which data product are available, evaluate, if they are relevant, and use them to build executable queries to answer business questions or handle specific tasks. 
+Data contracts describe the structure, semantics, quality, and terms of use. Data products provide the semantic context AI needs to understand not just what data exists, but what it means and how to use it correctly. 
+We use Data Mesh Manager as a data product marketplace to search for available data products and evaluate if these are relevant for the task by analyzing its metadata. 
 
-Data Mesh Manager is a central data product marketplace. AI agents use its MCP server to find relevant data products and to request access while enforcing _data governance_ rules and data contract specific terms of use.
+Once a data product is identified, data governance plays a crucial role in ensuring that access to data products is controlled, queries are in line with the data contract's terms of use, and its compliance with organizational global policies. If necessary, the AI agent can request access to the data product's output port, which may require manual approval from the data product owner.
 
-When the relevant data products are identified, we (for now) use technology-specific MCP servers to _query_ the actual data (typically tables in Databricks, Snowflake, S3, or APIs). The LLM can formulate SQL queries by analyzing the structure and semantics stated in the data contracts and execute queries through the MCP servers.
+Finally, the LLM can generate SQL queries based on the data contracts data model descriptions and semantics. The SQL queries are executed, while security guardrails are in place to ensure that no sensitive data is misused and attack vectors (such as prompt injections) are mitigated. The results are returned to the AI agent, which can then use them to answer the original business question.
+
+![](docs/architecture.svg)
 
 
 Steps:
