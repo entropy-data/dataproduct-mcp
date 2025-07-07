@@ -120,3 +120,7 @@ Add this entry:
 npx @modelcontextprotocol/inspector --config example.config.json --server dataproduct
 ```
 
+
+## Credits
+
+Created by [Simon Harrer](https://www.linkedin.com/in/simonharrer/), [André Deuerling](https://www.linkedin.com/in/andre-deuerling/), and [Jochen Christ](https://www.linkedin.com/in/jochenchrist/).
