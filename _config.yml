@@ -1,5 +1,4 @@
 plugins:
   - jekyll-sitemap
-markdown: kramdown
 name: "Data Product MCP"
 title: null
