@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
 from .connections.snowflake_client import execute_snowflake_query
 from .connections.databricks_client import execute_databricks_query
+from .safeguards import validate_readonly_query, validate_no_prompt_injection
 
 load_dotenv()
 
@@ -11,7 +12,7 @@ load_dotenv()
 mcp = FastMCP(
     name="DataProductServer",
     instructions="""
-You are connected to the Data Product MCP server, which provides access to organizational data through a data mesh manager.
+You are connected to the Data Product MCP server, which provides access to business data.
 
 ## Available Tools
 
@@ -19,9 +20,8 @@ You are connected to the Data Product MCP server, which provides access to organ
 - **Purpose**: Find and explore data products in the organization
 - **Parameters**: 
   - `search_term` (optional): Keywords to search for in data product names/descriptions
-  - `archetype` (optional): Filter by type (consumer-aligned, aggregate, source-aligned, application, dataconsumer)
-- **Returns**: List of active data products with basic information
-- **Strategy**: Uses multiple search approaches (list, semantic search, fallback) for comprehensive results
+- **Returns**: List of data products with basic information
+- **Use**: First use a generic search term like "sales", "customers", "marketing" to find relevant data products. Use more specific terms if the results are too broad.
 
 ### 2. dataproduct_get
 - **Purpose**: Get detailed information about a specific data product
@@ -37,7 +37,7 @@ You are connected to the Data Product MCP server, which provides access to organ
 - **Parameters**: 
   - `data_product_id` (required)
   - `output_port_id` (required) 
-  - `purpose` (required): Business justification for access
+  - `purpose` (required): Business justification for access. Use a high-level description of the kind of usage.
 - **Returns**: Access request status (may be auto-approved or require manual review)
 
 ### 4. dataproduct_query
@@ -72,7 +72,7 @@ async def dataproduct_search(
         search_term: Search term to filter data products. Multiple search terms are supported, separated by space.
                   
     Returns:
-        List of data product summaries with basic information, or list with error object.
+        List of data product summaries with basic information.
     """
     await ctx.info(f"dataproduct_search called with search_term={search_term}")
     
@@ -109,7 +109,8 @@ async def dataproduct_search(
         if not results and search_term:
             try:
                 await ctx.info("Trying semantic search endpoint")
-                search_results = await client.search(search_term, resource_type="DATA_PRODUCT")
+                search_term_for_semantic_search = "Find data products related to " + search_term
+                search_results = await client.search(search_term_for_semantic_search, resource_type="DATA_PRODUCT")
                 search_data_products = search_results.get("results", [])
                 
                 # Add results from search endpoint (avoid duplicates)
@@ -137,6 +138,11 @@ async def dataproduct_search(
             await ctx.info("No data products found matching your search criteria")
             return []
         
+        # Validate response for prompt injections
+        if not validate_no_prompt_injection(results, "search_response"):
+            await ctx.error("Response validation failed: Potential prompt injection detected in API response")
+            return [{"error": "Response blocked due to security concerns"}]
+        
         await ctx.info(f"dataproduct_search returned {len(results)} total data products")
         return results
         
@@ -158,7 +164,7 @@ async def dataproduct_get(ctx: Context, data_product_id: str) -> Dict[str, Any]:
         data_product_id: The data product ID.
         
     Returns:
-        Dict containing the data product details with enhanced output ports, or error object.
+        Dict containing the data product details with enhanced output ports.
     """
     await ctx.info(f"dataproduct_get called with data_product_id={data_product_id}")
     
@@ -226,6 +232,11 @@ async def dataproduct_get(ctx: Context, data_product_id: str) -> Dict[str, Any]:
                     await ctx.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
                     output_port["dataContract"] = None
         
+        # Validate response for prompt injections
+        if not validate_no_prompt_injection(data_product, "get_response"):
+            await ctx.error("Response validation failed: Potential prompt injection detected in API response")
+            return {"error": "Response blocked due to security concerns"}
+        
         # Return the enhanced data product directly as structured data
         await ctx.info(f"dataproduct_get successfully retrieved data product {data_product_id} with access status")
         return data_product
@@ -252,7 +263,7 @@ async def dataproduct_request_access(ctx: Context, data_product_id: str, output_
         purpose: The business purpose/reason for requesting access to this data. Use a high-level description of why you need this data.
         
     Returns:
-        Dict containing access request details including access_id, status, and approval information, or error object.
+        Dict containing access request details including access_id, status, and approval information.
     """
     await ctx.info(f"dataproduct_request_access called with data_product_id={data_product_id}, output_port_id={output_port_id}, purpose={purpose}")
     
@@ -289,7 +300,7 @@ async def dataproduct_request_access(ctx: Context, data_product_id: str, output_
 @mcp.tool()
 async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: str, query: str) -> Dict[str, Any]:
     """
-    Execute a SQL query on a data product's output port.
+    Execute an SQL query on a data product's output port.
     This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
     You must have access to the output port to execute queries.
     
@@ -299,7 +310,7 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
         query: The SQL query to execute.
         
     Returns:
-        Dict containing query results with row count and data (limited to 100 rows), or error object.
+        Dict containing query results with row count and data (limited to 100 rows).
     """
     await ctx.info(f"dataproduct_query called with data_product_id={data_product_id}, output_port_id={output_port_id}")
     
@@ -336,10 +347,16 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
             await ctx.error(f"Failed to check access status: {str(e)}")
             return {"error": "Unable to verify access status. Please ensure you have access to this output port."}
 
+        # Apply security safeguards to prevent write operations and dangerous patterns
+        if not validate_readonly_query(query):
+            await ctx.error("Query validation failed: Query rejected for security reasons")
+            return {"error": "Query rejected for security reasons"}
+        
+        await ctx.info("Query passed read-only validation")
+
         # Check that the query is in line with the purpose of the access agreement, and the data contract terms (dont be strict)
         # this check can be performed using a callback to the llm
         # todo
-
 
         # In the future, we can also check that the query is not violating any global policies
 
@@ -384,8 +401,10 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
             if len(results) > 100:
                 formatted_results["note"] = f"Results truncated to first 100 rows. Total rows: {len(results)}"
 
-            # check that that there are no prompt injections in the results
-            # todo
+            # Validate query results for prompt injections
+            if not validate_no_prompt_injection(formatted_results, "query_results"):
+                await ctx.error("Query results validation failed: Potential prompt injection detected in query results")
+                return {"error": "Query results blocked due to security concerns"}
 
             await ctx.info(f"Query executed successfully, returned {len(results)} rows")
             return formatted_results
