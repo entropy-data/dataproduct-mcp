@@ -68,3 +68,35 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+
+  dxt:
+    name: dxt
+    needs: pypi-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pip dependencies and run DXT pack
+        run: |
+          cd dxt
+          pip3.13 install dataproduct-mcp --target server/lib --upgrade --force-reinstall
+          npx @anthropic-ai/dxt pack . dataproduct.dxt
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dxt/dataproduct.dxt
+          tag: ${{ github.ref }}
+          overwrite: true
