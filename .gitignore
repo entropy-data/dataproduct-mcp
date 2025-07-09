@@ -67,3 +67,6 @@ venv.bak/
 ehthumbs.db
 Thumbs.db 
 /.claude/settings.local.json
+!/dxt/server/
+
+!/dxt/dataproduct.dxt

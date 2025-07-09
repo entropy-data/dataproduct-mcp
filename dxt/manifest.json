@@ -1,0 +1,132 @@
+{
+  "dxt_version": "0.1",
+  "name": "dataproduct-mcp",
+  "display_name": "Data Product MCP",
+  "version": "1.0.0",
+  "description": "An MCP server to securely access business data.",
+  "author": {
+    "name": "Entropy Data",
+    "email": "hello@entropy-data.com",
+    "url": "https://github.com/entropy-data/dataproduct-mcp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/entropy-data/dataproduct-mcp"
+  },
+  "homepage": "https://github.com/entropy-data/dataproduct-mcp",
+  "documentation": "https://github.com/entropy-data/dataproduct-mcp",
+  "server": {
+    "type": "python",
+    "entry_point": "dataproduct_mcp.server",
+    "mcp_config": {
+      "command": "python3.13",
+      "args": [
+        "-m", "dataproduct_mcp.server"
+      ],
+      "env": {
+        "DATAMESH_MANAGER_API_KEY": "${user_config.DATAMESH_MANAGER_API_KEY}",
+        "SNOWFLAKE_USER": "${user_config.SNOWFLAKE_USER}",
+        "SNOWFLAKE_PASSWORD": "${user_config.SNOWFLAKE_PASSWORD}",
+        "SNOWFLAKE_ROLE": "${user_config.SNOWFLAKE_ROLE}",
+        "SNOWFLAKE_WAREHOUSE": "${user_config.SNOWFLAKE_WAREHOUSE}",
+        "DATABRICKS_HOST": "${user_config.DATABRICKS_HOST}",
+        "DATABRICKS_HTTP_PATH": "${user_config.DATABRICKS_HTTP_PATH}",
+        "DATABRICKS_CLIENT_ID": "${user_config.DATABRICKS_CLIENT_ID}",
+        "DATABRICKS_CLIENT_SECRET": "${user_config.DATABRICKS_CLIENT_SECRET}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "dataproduct_search",
+      "description": "Search data products based on search terms. Only returns active data products."
+    },
+    {
+      "name": "dataproduct_get",
+      "description": "Get detailed information about a specific data product including output ports and access status."
+    },
+    {
+      "name": "dataproduct_request_access",
+      "description": "Request access to a specific output port of a data product."
+    },
+    {
+      "name": "dataproduct_query",
+      "description": "Execute SQL queries on data product output ports (requires active access)."
+    }
+  ],
+  "keywords": ["data", "mesh", "governance", "sql", "analytics", "snowflake", "databricks", "data-products"],
+  "license": "MIT",
+  "user_config": {
+    "DATAMESH_MANAGER_API_KEY": {
+      "type": "string",
+      "title": "Data Mesh Manager API Key",
+      "description": "The API Key with User scope",
+      "required": true,
+      "sensitive": true
+    },
+    "SNOWFLAKE_USER": {
+      "type": "string",
+      "title": "Snowflake Username",
+      "description": "Snowflake username for database connections",
+      "required": false,
+      "sensitive": false
+    },
+    "SNOWFLAKE_PASSWORD": {
+      "type": "string",
+      "title": "Snowflake Password",
+      "description": "Snowflake password for database connections",
+      "required": false,
+      "sensitive": true
+    },
+    "SNOWFLAKE_ROLE": {
+      "type": "string",
+      "title": "Snowflake Role",
+      "description": "Snowflake role for database connections",
+      "required": false,
+      "sensitive": false
+    },
+    "SNOWFLAKE_WAREHOUSE": {
+      "type": "string",
+      "title": "Snowflake Warehouse",
+      "description": "Snowflake warehouse name (default: COMPUTE_WH)",
+      "required": false,
+      "sensitive": false,
+      "default": "COMPUTE_WH"
+    },
+    "DATABRICKS_HOST": {
+      "type": "string",
+      "title": "Databricks Host",
+      "description": "Databricks workspace host URL",
+      "required": false,
+      "sensitive": false
+    },
+    "DATABRICKS_HTTP_PATH": {
+      "type": "string",
+      "title": "Databricks HTTP Path",
+      "description": "Databricks SQL warehouse HTTP path",
+      "required": false,
+      "sensitive": false
+    },
+    "DATABRICKS_CLIENT_ID": {
+      "type": "string",
+      "title": "Databricks Client ID",
+      "description": "Databricks client ID for authentication",
+      "required": false,
+      "sensitive": false
+    },
+    "DATABRICKS_CLIENT_SECRET": {
+      "type": "string",
+      "title": "Databricks Client Secret",
+      "description": "Databricks client secret for authentication",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "python": ">=3.13.0 <4"
+    }
+  }
+}
