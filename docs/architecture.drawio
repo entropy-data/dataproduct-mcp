@@ -1,13 +1,13 @@
-<mxfile host="Electron" modified="2025-07-07T13:56:18.754Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/21.5.1 Chrome/112.0.5615.204 Electron/24.6.0 Safari/537.36" etag="tHIeyagAXM94h3c-e9AH" version="21.5.1" type="device">
+<mxfile host="Electron" modified="2025-07-09T09:27:53.455Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.5.3 Chrome/124.0.6367.207 Electron/30.0.6 Safari/537.36" etag="hWYhwB0NW3V1_wnxTToh" version="24.5.3" type="device">
   <diagram name="Page-1" id="GjYPB1wrOV77Kf_UKATb">
-    <mxGraphModel dx="891" dy="594" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="1026" dy="743" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-17" value="AI Agent (MCP Client)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;&amp;nbsp;e.g., ChatGPT, Claude, Copilot&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-17" value="AI Agent (MCP Client)&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;&amp;nbsp;e.g., ChatGPT, Claude, Copilot&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" parent="1" vertex="1">
           <mxGeometry x="240" y="200" width="640" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" target="TuxKoJz2lapMnQEzsZ7t-21">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-27" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="TuxKoJz2lapMnQEzsZ7t-21" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="395" y="500" as="sourcePoint" />
             <Array as="points">
@@ -16,7 +16,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" target="TuxKoJz2lapMnQEzsZ7t-24">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" target="TuxKoJz2lapMnQEzsZ7t-24" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="720.04" y="500" as="sourcePoint" />
             <Array as="points">
@@ -25,62 +25,68 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-16" value="Data Product MCP Server" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-16" value="Data Product MCP Server" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="240" y="370" width="640" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-2" value="Discovery" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fde68a;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-2" value="Discovery" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#fde68a;" parent="1" vertex="1">
           <mxGeometry x="295" y="413" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="TuxKoJz2lapMnQEzsZ7t-4">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="TuxKoJz2lapMnQEzsZ7t-4" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="485" y="458" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-4" value="Find and evaluate &lt;br&gt;data products based on semantic context" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fffbeb;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-4" value="Find and evaluate &lt;br&gt;data products based on semantic context" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fffbeb;" parent="1" vertex="1">
           <mxGeometry x="295" y="443" width="150" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-5" value="Governance" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#6ee7b7;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-5" value="Governance" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#6ee7b7;" parent="1" vertex="1">
           <mxGeometry x="485" y="413" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="TuxKoJz2lapMnQEzsZ7t-7">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" parent="1" source="TuxKoJz2lapMnQEzsZ7t-7" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="675" y="458" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-7" value="Request access, check data contract terms of use, purpose, global policies" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ecfdf5;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-7" value="Request access, check data contract terms of use, purpose, global policies" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ecfdf5;" parent="1" vertex="1">
           <mxGeometry x="485" y="443" width="150" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-8" value="Query" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#bfdbfe;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-8" value="Query" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#bfdbfe;" parent="1" vertex="1">
           <mxGeometry x="675" y="413" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-10" value="Generate executable &lt;br&gt;SQL queries&amp;nbsp;&lt;br&gt;with security guardrails" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eef2ff;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-10" value="Generate executable &lt;br&gt;SQL queries&amp;nbsp;&lt;br&gt;with security guardrails" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eef2ff;" parent="1" vertex="1">
           <mxGeometry x="675" y="443" width="150" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="TuxKoJz2lapMnQEzsZ7t-17" target="TuxKoJz2lapMnQEzsZ7t-16">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="TuxKoJz2lapMnQEzsZ7t-17" target="TuxKoJz2lapMnQEzsZ7t-16" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="560" y="340" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-15" value="Any question or task that requires business context" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe4e6;fontStyle=1" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-15" value="Any question or task that requires business context" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe4e6;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="500" y="250" width="120" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-21" value="Data Marketplace" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-21" value="Data Marketplace" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" parent="1" vertex="1">
           <mxGeometry x="240" y="540" width="310" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-22" value="Data Mesh Manager" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5d0fe;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-22" value="Data Mesh Manager" style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#f5d0fe;" parent="1" vertex="1">
           <mxGeometry x="320" y="583" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-23" value="Metadata and governance platform for data products with data contracts" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fdf4ff;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-23" value="Metadata and governance platform for data products with data contracts" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fdf4ff;" parent="1" vertex="1">
           <mxGeometry x="320" y="613" width="150" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-24" value="Data Platform" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-24" value="Data Platform" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;dashed=1;" parent="1" vertex="1">
           <mxGeometry x="570" y="540" width="310" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-25" value="Snowflake, Databricks, ..." style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#cbd5e1;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-25" value="Snowflake, Databricks, ..." style="rounded=0;whiteSpace=wrap;html=1;fontStyle=1;fillColor=#cbd5e1;" parent="1" vertex="1">
           <mxGeometry x="650" y="583" width="150" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="TuxKoJz2lapMnQEzsZ7t-26" value="Actual data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;" vertex="1" parent="1">
+        <mxCell id="TuxKoJz2lapMnQEzsZ7t-26" value="Actual data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8fafc;" parent="1" vertex="1">
           <mxGeometry x="650" y="613" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="TL19e-A8f9wudzsVy3ck-1" value="github.com/entropy-data/dataproduct-mcp" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="660" y="690" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="TL19e-A8f9wudzsVy3ck-2" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/2048px-Octicons-mark-github.svg.png;" vertex="1" parent="1">
+          <mxGeometry x="648" y="697.5" width="15" height="15" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
