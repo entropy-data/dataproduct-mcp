@@ -33,3 +33,6 @@ jobs:
         with:
           name: dataproduct-dxt
           path: dxt/dataproduct.dxt
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
