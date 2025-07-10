@@ -64,7 +64,17 @@ Steps:
       - `query` (string): The SQL query to execute.
     - Returns: Query results as structured data (limited to 100 rows)
     
-## Configuration
+## Installation
+
+### Claude Desktop
+
+For Claude Desktop, you can install the MCP server as a [desktop extension](https://www.anthropic.com/engineering/desktop-extensions):
+
+Download and open:
+
+[dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
+
+### Other MCP Clients
 
 Add this entry to your MCP client configuration:
 
@@ -94,11 +104,55 @@ Add this entry to your MCP client configuration:
 
 This is the format for Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`), other MCP clients have similar config options.
 
-In [Data Mesh Manager](https://www.datamesh-manager.com), create an API Key with scope "User (personal access token)".
 
-Add the properties for Snowflake, Databricks, etc. as needed.
+### Configuration
 
-(Yes, we will work on OAuth2 based authentication to get rid of these access tokens)
+#### Data Mesh Manager API Key
+To authenticate with Data Mesh Manager, you need to set the `DATAMESH_MANAGER_API_KEY` variable to your API key.
+
+[How to create an API Key in Data Mesh Manager](https://docs.datamesh-manager.com/authentication).
+
+(Yes, we will work on OAuth2 based authentication to simplify this in the future.)
+
+#### Snowflake
+
+If you use Snowflake as a data platform, create a [programmatic access token](https://docs.snowflake.com/en/user-guide/programmatic-access-tokens) for your user. Create a new user in Snowflake if the AI agent is not acting on behalf of a real user, create a new service user for the AI agent, and grant it the necessary permissions to access the data products.
+
+You also might need to configure the [network policies](
+https://docs.snowflake.com/en/user-guide/programmatic-access-tokens#label-pat-prerequisites-network) to enable programmatic access tokens.
+
+
+The user needs:
+- The `USAGE` privilege on the warehouse you want to use.
+- An assigned role (e.g., `DATAPRODUCT_MCP`) with the `USAGE` privilege on the database and schema of the data products you want to access.
+
+You can use the [Snowflake Connector](https://github.com/datamesh-manager/datamesh-manager-connector-snowflake) to automatically grant access to the data in Snowflake, when the access request is approved in Data Mesh Manager.
+
+| Environment Variable                        | Description                                          |
+|---------------------------------------------|------------------------------------------------------|
+| `DATACONTRACT_SNOWFLAKE_USERNAME`           | Your username                                        |
+| `DATACONTRACT_SNOWFLAKE_PASSWORD`           | Your programmatic access token                       |
+| `DATACONTRACT_SNOWFLAKE_WAREHOUSE`          | The warehouse you want to use, such as `COMPUTE_WH`. |
+| `DATACONTRACT_SNOWFLAKE_ROLE`               | The assigned user role, e.g. `DATAPRODUCT_MCP`       |
+
+
+#### Databricks
+
+
+If you use Databricks as a data platform, you need to create a [service principal](https://docs.databricks.com/dev-tools/api/latest/authentication.html#service-principals) and assign it the necessary permissions to access the data products. Create an OAuth2 client ID and secret for the service principal.
+
+You can use the [Databricks Connector](https://github.com/datamesh-manager/datamesh-manager-connector-databricks/) to automatically grant access to the data in Databricks, when the access request is approved in Data Mesh Manager.
+
+You need to configure a Databricks SQL warehouse. The serverless warehouse is recommended for fast query execution.
+
+| Environment Variable                        | Description                                                                                                                                                                            |
+|---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `DATABRICKS_CLIENT_ID`                      | The OAuth2 client ID of the service principal                                                                                                                                          |
+| `DATABRICKS_CLIENT_SECRET`                  | The OAuth2 client secret of the service principal                                                                                                                                      |
+| `DATABRICKS_HOST`                           | The Databricks workspace URL, without leading https://. e.g. `adb-xxx.azuredatabricks.net`. Go to Compute -> SQL warehouses -> Your Warehouse -> Connection details -> Server hostname |
+| `DATABRICKS_HTTP_PATH`                      | The HTTP path for the SQL endpoint, e.g. `/sql/1.0/warehouses/xxx`. Go to Compute -> SQL warehouses -> Your Warehouse -> Connection details -> HTTP path                               |
+
+
 
 
 ## Supported Server Types
