@@ -66,15 +66,19 @@ Steps:
     
 ## Installation
 
-### Claude Desktop
+[//]: # (### Claude Desktop)
 
-For Claude Desktop, you can install the MCP server as a [desktop extension](https://www.anthropic.com/engineering/desktop-extensions):
+[//]: # ()
+[//]: # (For Claude Desktop, you can install the MCP server as a [desktop extension]&#40;https://www.anthropic.com/engineering/desktop-extensions&#41;:)
 
-Download and open:
+[//]: # ()
+[//]: # (Download and open:)
 
-[dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
+[//]: # ()
+[//]: # ([dataproduct-mcp.dxt]&#40;https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt&#41;)
 
-### Other MCP Clients
+[//]: # ()
+[//]: # (### Other MCP Clients)
 
 Add this entry to your MCP client configuration:
 
@@ -88,6 +92,7 @@ Add this entry to your MCP client configuration:
       ],
       "env": {
         "DATAMESH_MANAGER_API_KEY": "dmm_live_user_...",
+        "DATAMESH_MANAGER_HOST": "https://api.datamesh-manager.com",
         "SNOWFLAKE_USER": "",
         "SNOWFLAKE_PASSWORD": "",
         "SNOWFLAKE_ROLE": "",
@@ -107,10 +112,18 @@ This is the format for Claude Desktop (`~/Library/Application Support/Claude/cla
 
 ### Configuration
 
-#### Data Mesh Manager API Key
+#### Data Mesh Manager Configuration
+
+| Environment Variable | Description | Required | Default |
+|---------------------|-------------|----------|---------|
+| `DATAMESH_MANAGER_API_KEY` | API key for authentication | Yes | N/A |
+| `DATAMESH_MANAGER_HOST` | Base URL for self-hosted instances | No | `https://api.datamesh-manager.com` |
+
 To authenticate with Data Mesh Manager, you need to set the `DATAMESH_MANAGER_API_KEY` variable to your API key.
 
 [How to create an API Key in Data Mesh Manager](https://docs.datamesh-manager.com/authentication).
+
+For self-hosted Data Mesh Manager instances, set the `DATAMESH_MANAGER_HOST` environment variable to your instance URL.
 
 (Yes, we will work on OAuth2 based authentication to simplify this in the future.)
 

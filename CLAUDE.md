@@ -63,7 +63,7 @@ The server exposes these tools to AI agents:
 
 ### Environment Variables
 - `DATAMESH_MANAGER_API_KEY`: Required API key for authentication
-- API base URL defaults to `https://api.datamesh-manager.com`
+- `DATAMESH_MANAGER_HOST`: Optional API base URL for self-hosted instances (defaults to `https://api.datamesh-manager.com`)
 
 ### Claude Desktop Integration
 Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
@@ -74,7 +74,8 @@ Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "uv",
       "args": ["run", "--directory", "<path_to_folder>/dataproduct-mcp", "python", "-m", "dataproduct_mcp.server"],
       "env": {
-        "DATAMESH_MANAGER_API_KEY": "dmm_live_..."
+        "DATAMESH_MANAGER_API_KEY": "dmm_live_...",
+        "DATAMESH_MANAGER_HOST": "https://your-self-hosted-instance.com"
       }
     }
   }

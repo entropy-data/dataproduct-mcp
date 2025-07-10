@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "dataproduct-mcp",
   "display_name": "Data Product MCP",
-  "version": "1.0.0",
+  "version": "0.1.6",
   "description": "An MCP server to securely access business data.",
   "author": {
     "name": "Entropy Data",
@@ -25,6 +25,7 @@
       ],
       "env": {
         "DATAMESH_MANAGER_API_KEY": "${user_config.DATAMESH_MANAGER_API_KEY}",
+        "DATAMESH_MANAGER_HOST": "${user_config.DATAMESH_MANAGER_HOST}",
         "SNOWFLAKE_USER": "${user_config.SNOWFLAKE_USER}",
         "SNOWFLAKE_PASSWORD": "${user_config.SNOWFLAKE_PASSWORD}",
         "SNOWFLAKE_ROLE": "${user_config.SNOWFLAKE_ROLE}",
@@ -64,6 +65,14 @@
       "description": "The API Key with User scope",
       "required": true,
       "sensitive": true
+    },
+    "DATAMESH_MANAGER_HOST": {
+      "type": "string",
+      "title": "Data Mesh Manager Host",
+      "description": "Base URL for self-hosted Data Mesh Manager instances (defaults to https://api.datamesh-manager.com)",
+      "required": false,
+      "sensitive": false,
+      "default": "https://api.datamesh-manager.com"
     },
     "SNOWFLAKE_USER": {
       "type": "string",

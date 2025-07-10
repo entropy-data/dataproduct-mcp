@@ -423,6 +423,8 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
 
 def main():
     """Entry point for the executable."""
+    from importlib.metadata import version
+    version("dataproduct-mcp")
     mcp.run(transport='stdio')
 
 

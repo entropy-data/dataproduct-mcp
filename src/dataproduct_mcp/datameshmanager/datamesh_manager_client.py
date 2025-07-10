@@ -8,13 +8,14 @@ from .models import AccessStatusResult, RequestAccessRequest, RequestAccessResul
 class DataMeshManagerClient:
     """Client for interacting with the Data Mesh Manager API."""
     
-    def __init__(self, api_key: Optional[str] = None, base_url: str = "https://api.datamesh-manager.com"):
+    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
         """
         Initialize the Data Mesh Manager client.
         
         Args:
             api_key: API key for authentication. If not provided, will try to get from DATAMESH_MANAGER_API_KEY env var.
-            base_url: Base URL for the API. Defaults to the production API.
+            base_url: Base URL for the API. If not provided, will try to get from DATAMESH_MANAGER_HOST env var,
+                     otherwise defaults to the production API.
         """
         # Set up logging
         self.logger = logging.getLogger(__name__)
@@ -44,7 +45,14 @@ class DataMeshManagerClient:
                 "}"
             )
         
-        self.base_url = base_url.rstrip('/')
+        # Use provided base_url, or fall back to DATAMESH_MANAGER_HOST env var if set and not empty, or default
+        env_host = os.getenv("DATAMESH_MANAGER_HOST")
+        if base_url:
+            self.base_url = base_url.rstrip('/')
+        elif env_host and env_host.strip():
+            self.base_url = env_host.rstrip('/')
+        else:
+            self.base_url = "https://api.datamesh-manager.com"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
