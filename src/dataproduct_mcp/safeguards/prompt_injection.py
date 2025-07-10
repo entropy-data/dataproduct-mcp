@@ -107,11 +107,8 @@ def _generate_injection_keywords() -> Set[str]:
     """Generate potential injection keywords by combining verbs and objects."""
     keywords = set()
     
-    # Add individual verbs and objects
-    keywords.update(INJECTION_VERBS)
-    keywords.update(INJECTION_OBJECTS)
-    
-    # Generate combinations
+    # Only add verb-object combinations, not individual verbs
+    # This reduces false positives from common words like "update", "change", etc.
     for verb in INJECTION_VERBS:
         for obj in INJECTION_OBJECTS:
             keywords.add(f"{verb} {obj}")
