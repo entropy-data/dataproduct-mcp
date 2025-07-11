@@ -100,7 +100,8 @@ Add this entry to your MCP client configuration:
         "DATABRICKS_HOST": "adb-xxx.azuredatabricks.net",
         "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/xxx",
         "DATABRICKS_CLIENT_ID": "",
-        "DATABRICKS_CLIENT_SECRET": ""
+        "DATABRICKS_CLIENT_SECRET": "",
+        "BIGQUERY_CREDENTIALS_PATH": "/path/to/service-account-key.json"
       }
     }
   }
@@ -151,7 +152,6 @@ You can use the [Snowflake Connector](https://github.com/datamesh-manager/datame
 
 #### Databricks
 
-
 If you use Databricks as a data platform, you need to create a [service principal](https://docs.databricks.com/dev-tools/api/latest/authentication.html#service-principals) and assign it the necessary permissions to access the data products. Create an OAuth2 client ID and secret for the service principal.
 
 You can use the [Databricks Connector](https://github.com/datamesh-manager/datamesh-manager-connector-databricks/) to automatically grant access to the data in Databricks, when the access request is approved in Data Mesh Manager.
@@ -164,6 +164,30 @@ You need to configure a Databricks SQL warehouse. The serverless warehouse is re
 | `DATABRICKS_CLIENT_SECRET`                  | The OAuth2 client secret of the service principal                                                                                                                                      |
 | `DATABRICKS_HOST`                           | The Databricks workspace URL, without leading https://. e.g. `adb-xxx.azuredatabricks.net`. Go to Compute -> SQL warehouses -> Your Warehouse -> Connection details -> Server hostname |
 | `DATABRICKS_HTTP_PATH`                      | The HTTP path for the SQL endpoint, e.g. `/sql/1.0/warehouses/xxx`. Go to Compute -> SQL warehouses -> Your Warehouse -> Connection details -> HTTP path                               |
+
+#### BigQuery
+
+If you use BigQuery as a data platform, you need to create a [service account](https://cloud.google.com/iam/docs/service-accounts) and assign it the necessary permissions to access the data products. Download the service account key as a JSON file.
+
+You can use the [BigQuery Connector](https://github.com/datamesh-manager/datamesh-manager-connector-bigquery/) to automatically grant access to the data in BigQuery, when the access request is approved in Data Mesh Manager.
+
+The service account needs the following IAM roles:
+- `BigQuery Data Editor` - to query datasets
+- `BigQuery Job User` - to execute queries
+
+| Environment Variable                        | Description                                                                                                                                                                            |
+|---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `BIGQUERY_CREDENTIALS_PATH`                 | Path to the service account key JSON file                                                                                                                                              |
+
+**Note**: Google Cloud Project ID and dataset information are specified in the data product's output port server configuration, not as environment variables.
+
+To get your service account credentials:
+1. Go to the Google Cloud Console
+2. Navigate to IAM & Admin > Service Accounts
+3. Create a new service account or use an existing one
+4. Add the `BigQuery Data Editor` and `BigQuery Job User` roles
+5. Generate and download a JSON key file
+6. Set `BIGQUERY_CREDENTIALS_PATH` to the path of the JSON file
 
 
 
@@ -178,11 +202,11 @@ The following server types are currently supported out-of-the-box:
  |-------------|-------------|----------------------------------------------------------------------------------------------------------------------|
  | Snowflake   | ✅           | Requires SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE environment variables               |
  | Databricks  | ✅           | Requires DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_CLIENT_ID, DATABRICKS_CLIENT_SECRET environment variables |
+ | BigQuery    | ✅           | Requires BIGQUERY_CREDENTIALS_PATH environment variable (project/dataset specified in output port)                   |
  | S3          | Coming soon | Implemented through DuckDB client                                                                                    |
- | BigQuery    | Coming soon |                                                                                                                      |
  | Fabric      | Coming soon |                                                                                                                      |
  
- > **Note:** Use additional Platform-specific MCP servers for other data platform types (e.g., BigQuery, Redshift, PostgreSQL) by adding them to your MCP client.
+ > **Note:** Use additional Platform-specific MCP servers for other data platform types (e.g., Redshift, PostgreSQL) by adding them to your MCP client.
 
 
 ## Contributing

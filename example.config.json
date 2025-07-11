@@ -16,7 +16,8 @@
             "DATABRICKS_HOST": "adb-xxx.azuredatabricks.net",
             "DATABRICKS_HTTP_PATH": "/sql/1.0/warehouses/...",
             "DATABRICKS_CLIENT_ID": "4e91dae3...",
-            "DATABRICKS_CLIENT_SECRET": "dose9de...."
+            "DATABRICKS_CLIENT_SECRET": "dose9de....",
+            "BIGQUERY_CREDENTIALS_PATH": "/path/to/service-account-key.json"
           }
         }
     }

@@ -65,6 +65,11 @@ The server exposes these tools to AI agents:
 - `DATAMESH_MANAGER_API_KEY`: Required API key for authentication
 - `DATAMESH_MANAGER_HOST`: Optional API base URL for self-hosted instances (defaults to `https://api.datamesh-manager.com`)
 
+#### BigQuery Configuration
+- `BIGQUERY_CREDENTIALS_PATH`: Path to service account key file
+
+**Note**: Google Cloud Project ID and dataset information are specified in the data product's output port server configuration, not as environment variables.
+
 ### Claude Desktop Integration
 Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
@@ -75,7 +80,8 @@ Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "args": ["run", "--directory", "<path_to_folder>/dataproduct-mcp", "python", "-m", "dataproduct_mcp.server"],
       "env": {
         "DATAMESH_MANAGER_API_KEY": "dmm_live_...",
-        "DATAMESH_MANAGER_HOST": "https://your-self-hosted-instance.com"
+        "DATAMESH_MANAGER_HOST": "https://your-self-hosted-instance.com",
+        "BIGQUERY_CREDENTIALS_PATH": "/path/to/service-account-key.json"
       }
     }
   }

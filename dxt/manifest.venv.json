@@ -19,12 +19,11 @@
     "type": "python",
     "entry_point": "dataproduct_mcp.server",
     "mcp_config": {
-      "command": "python3.13",
+      "command": "${__dirname}/server/venv/bin/python3.13",
       "args": [
         "-m", "dataproduct_mcp.server"
       ],
       "env": {
-        "PYTHONPATH": "${__dirname}/server/lib",
         "DATAMESH_MANAGER_API_KEY": "${user_config.DATAMESH_MANAGER_API_KEY}",
         "DATAMESH_MANAGER_HOST": "${user_config.DATAMESH_MANAGER_HOST}",
         "SNOWFLAKE_USER": "${user_config.SNOWFLAKE_USER}",
@@ -35,7 +34,7 @@
         "DATABRICKS_HTTP_PATH": "${user_config.DATABRICKS_HTTP_PATH}",
         "DATABRICKS_CLIENT_ID": "${user_config.DATABRICKS_CLIENT_ID}",
         "DATABRICKS_CLIENT_SECRET": "${user_config.DATABRICKS_CLIENT_SECRET}",
-        "PYTHONPATH": "${__dirname}/server/lib"
+        "BIGQUERY_CREDENTIALS_PATH": "${user_config.BIGQUERY_CREDENTIALS_PATH}"
       }
     }
   },
@@ -54,10 +53,10 @@
     },
     {
       "name": "dataproduct_query",
-      "description": "Execute SQL queries on data product output ports. Supports Snowflake, Databricks, and BigQuery platforms (requires active access)."
+      "description": "Execute SQL queries on data product output ports (requires active access)."
     }
   ],
-  "keywords": ["data", "mesh", "governance", "sql", "analytics", "snowflake", "databricks", "bigquery", "data-products"],
+  "keywords": ["data", "mesh", "governance", "sql", "analytics", "snowflake", "databricks", "data-products"],
   "license": "MIT",
   "user_config": {
     "DATAMESH_MANAGER_API_KEY": {

@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
 from .connections.snowflake_client import execute_snowflake_query
 from .connections.databricks_client import execute_databricks_query
+from .connections.bigquery_client import execute_bigquery_query
 from .safeguards import validate_readonly_query, validate_no_prompt_injection
 
 load_dotenv()
@@ -47,7 +48,7 @@ You are connected to the Data Product MCP server, which provides access to busin
   - `data_product_id` (required)
   - `output_port_id` (required)
   - `query` (required): SQL query to execute
-- **Supports**: Snowflake and Databricks platforms
+- **Supports**: Snowflake, Databricks, and BigQuery platforms
 - **Returns**: Query results as structured data (limited to 100 rows)
 
 ## Typical Workflow
@@ -369,9 +370,9 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
         
         # Get server type from output port type field
         server_type = target_output_port.get("type", "").lower()
-        if server_type not in ["snowflake", "databricks"]:
+        if server_type not in ["snowflake", "databricks", "bigquery"]:
             await ctx.error(f"Unsupported server type: {server_type}")
-            return {"error": f"Unsupported server type '{server_type}'. Supported types: snowflake, databricks"}
+            return {"error": f"Unsupported server type '{server_type}'. Supported types: snowflake, databricks, bigquery"}
 
         # Execute the query based on server type
         try:
@@ -379,8 +380,10 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
                 results = await execute_snowflake_query(server_info, query)
             elif server_type == "databricks":
                 results = await execute_databricks_query(server_info, query)
+            elif server_type == "bigquery":
+                results = await execute_bigquery_query(server_info, query)
             else:
-                return {"error": f"Server type '{server_type}' is not yet supported by dataproduct-mcp. Supported types: snowflake, databricks"}
+                return {"error": f"Server type '{server_type}' is not yet supported by dataproduct-mcp. Supported types: snowflake, databricks, bigquery"}
             
             # Format results for display
             if not results:

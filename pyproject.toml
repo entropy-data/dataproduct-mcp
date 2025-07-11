@@ -13,6 +13,7 @@ dependencies = [
     "snowflake-connector-python>=3.0.0",
     "databricks-sql-connector>=3.0.0",
     "databricks-sdk>=0.20.0",
+    "google-cloud-bigquery>=3.0.0",
 ]
 
 [project.optional-dependencies]
