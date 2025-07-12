@@ -14,6 +14,7 @@ mcp = FastMCP(
     name="DataProductServer",
     instructions="""
 You are connected to the Data Product MCP server, which provides access to business data.
+Use this MCP server if you need access to internal business data, such as customers, orders...
 
 ## Available Tools
 

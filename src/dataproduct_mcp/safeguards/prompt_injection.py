@@ -3,7 +3,7 @@ Prompt injection detection to prevent malicious attempts to manipulate AI behavi
 """
 import re
 import logging
-from typing import Set, List
+from typing import Set
 from difflib import SequenceMatcher
 
 # Set up logging for security events
@@ -30,27 +30,14 @@ INJECTION_PATTERNS = [
     r'forget\s+(all\s+)?previous\s+instructions',
     r'you\s+are\s+now\s+a\s+different',
     r'act\s+as\s+if\s+you\s+are',
-    r'pretend\s+to\s+be',
-    r'roleplay\s+as',
     r'new\s+instructions:',
     r'updated\s+instructions:',
     r'system\s+override',
-    r'developer\s+mode',
-    r'jailbreak',
-    r'sudo\s+mode',
-    r'admin\s+mode',
-    r'root\s+access',
     r'bypass\s+safety',
-    r'disable\s+filters',
-    r'remove\s+restrictions',
-    r'unrestricted\s+mode',
-    r'maintenance\s+mode',
     r'override\s+security',
     r'emergency\s+protocol',
     r'backdoor\s+access',
-    r'master\s+key',
     r'unlimited\s+access',
-    r'full\s+access',
     r'complete\s+access',
     r'unrestricted\s+access'
 ]
@@ -231,13 +218,13 @@ def detect_prompt_injection(text: str, threshold: float = 0.7) -> bool:
         return True
     
     # Check similarity with injection keywords
-    injection_keywords = _generate_injection_keywords()
-    similarity_score = _calculate_similarity_score(text, injection_keywords)
-    
-    if similarity_score >= threshold:
-        logger.warning(f"Similarity threshold exceeded: {similarity_score:.3f} >= {threshold} for normalized text: '{normalized_text}'")
-        return True
-    
+    # injection_keywords = _generate_injection_keywords()
+    # similarity_score = _calculate_similarity_score(text, injection_keywords)
+    #
+    # if similarity_score >= threshold:
+    #     logger.warning(f"Similarity threshold exceeded: {similarity_score:.3f} >= {threshold} for normalized text: '{normalized_text}'")
+    #     return True
+    #
     return False
 
 

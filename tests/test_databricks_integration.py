@@ -26,17 +26,13 @@ class TestDatabricksIntegration:
         # Use a simple query that should work on any Databricks environment
         test_query = "SELECT 1 as test_column"
 
-        try:
-            # Execute the query
-            results = await execute_databricks_query(databricks_server_info, test_query)
+        # Execute the query
+        results = await execute_databricks_query(databricks_server_info, test_query)
+
+        # Verify the results
+        assert isinstance(results, list)
+        assert len(results) == 1
+        assert isinstance(results[0], dict)
+        assert "test_column" in results[0]
+        assert results[0]["test_column"] == 1
             
-            # Verify the results
-            assert isinstance(results, list)
-            assert len(results) == 1
-            assert isinstance(results[0], dict)
-            assert "test_column" in results[0]
-            assert results[0]["test_column"] == 1
-            
-        except Exception as e:
-            # If the test fails due to connection issues, skip with informative message
-            pytest.skip(f"Databricks connection failed: {str(e)}. This might be due to network issues, invalid credentials, or cluster not running.")
