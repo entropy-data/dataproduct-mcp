@@ -5,7 +5,7 @@ from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
 from .connections.snowflake_client import execute_snowflake_query
 from .connections.databricks_client import execute_databricks_query
 from .connections.bigquery_client import execute_bigquery_query
-from .safeguards import validate_readonly_query, validate_no_prompt_injection
+from .safeguards import validate_readonly_query, sanitize_prompt_injection
 
 load_dotenv()
 
@@ -140,10 +140,8 @@ async def dataproduct_search(
             await ctx.info("No data products found matching your search criteria")
             return []
         
-        # Validate response for prompt injections
-        if not validate_no_prompt_injection(results, "search_response"):
-            await ctx.error("Response validation failed: Potential prompt injection detected in API response")
-            return [{"error": "Response blocked due to security concerns"}]
+        # Sanitize response for prompt injections
+        results = sanitize_prompt_injection(results, "search_response")
         
         await ctx.info(f"dataproduct_search returned {len(results)} total data products")
         return results
@@ -234,10 +232,8 @@ async def dataproduct_get(ctx: Context, data_product_id: str) -> Dict[str, Any]:
                     await ctx.warning(f"Failed to resolve data contract {data_contract_id}: {str(e)}")
                     output_port["dataContract"] = None
         
-        # Validate response for prompt injections
-        if not validate_no_prompt_injection(data_product, "get_response"):
-            await ctx.error("Response validation failed: Potential prompt injection detected in API response")
-            return {"error": "Response blocked due to security concerns"}
+        # Sanitize response for prompt injections
+        data_product = sanitize_prompt_injection(data_product, "get_response")
         
         # Return the enhanced data product directly as structured data
         await ctx.info(f"dataproduct_get successfully retrieved data product {data_product_id} with access status")
@@ -405,10 +401,8 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
             if len(results) > 100:
                 formatted_results["note"] = f"Results truncated to first 100 rows. Total rows: {len(results)}"
 
-            # Validate query results for prompt injections
-            if not validate_no_prompt_injection(formatted_results, "query_results"):
-                await ctx.error("Query results validation failed: Potential prompt injection detected in query results")
-                return {"error": "Query results blocked due to security concerns"}
+            # Sanitize query results for prompt injections
+            formatted_results = sanitize_prompt_injection(formatted_results, "query_results")
 
             await ctx.info(f"Query executed successfully, returned {len(results)} rows")
             return formatted_results

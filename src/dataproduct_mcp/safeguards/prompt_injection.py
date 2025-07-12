@@ -228,6 +228,37 @@ def detect_prompt_injection(text: str, threshold: float = 0.7) -> bool:
     return False
 
 
+def sanitize_prompt_injection(data, context: str = "unknown"):
+    """
+    Sanitize data by replacing detected prompt injection attempts with redaction message.
+    
+    Args:
+        data: The data to sanitize (string, dict, list, or other types)
+        context: Context description for logging (e.g., "user_input", "api_response")
+        
+    Returns:
+        Sanitized version of the data with suspicious content redacted
+    """
+    if isinstance(data, str):
+        if detect_prompt_injection(data):
+            logger.warning(f"Prompt injection detected and redacted in {context}: {data[:100]}{'...' if len(data) > 100 else ''}")
+            return "[content redacted due to security concerns]"
+        return data
+    
+    elif isinstance(data, dict):
+        sanitized = {}
+        for key, value in data.items():
+            sanitized[key] = sanitize_prompt_injection(value, f"{context}.{key}")
+        return sanitized
+    
+    elif isinstance(data, list):
+        return [sanitize_prompt_injection(item, f"{context}[{i}]") for i, item in enumerate(data)]
+    
+    else:
+        # For other types (int, float, bool, None), return as-is
+        return data
+
+
 def validate_no_prompt_injection(data, context: str = "unknown") -> bool:
     """
     Validate that data does not contain prompt injection attempts.
