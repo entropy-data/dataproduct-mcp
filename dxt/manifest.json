@@ -35,7 +35,7 @@
         "DATABRICKS_HTTP_PATH": "${user_config.DATABRICKS_HTTP_PATH}",
         "DATABRICKS_CLIENT_ID": "${user_config.DATABRICKS_CLIENT_ID}",
         "DATABRICKS_CLIENT_SECRET": "${user_config.DATABRICKS_CLIENT_SECRET}",
-        "PYTHONPATH": "${__dirname}/server/lib"
+        "BIGQUERY_CREDENTIALS_PATH": "${user_config.BIGQUERY_CREDENTIALS_PATH}"
       }
     }
   },
