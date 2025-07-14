@@ -12,19 +12,17 @@ from dataproduct_mcp.connections.databricks_client import execute_databricks_que
 class TestDatabricksIntegration:
     """Integration tests for Databricks client connectivity and functionality."""
 
-    @pytest.fixture
-    def databricks_server_info(self):
-        """Create server info for Databricks testing using environment variables."""
-        return {
-            "catalog": "sales_customers_demo",
-            "schema": "dp_customers_v1"
-        }
-
     @pytest.mark.asyncio
-    async def test_databricks_simple_query_execution(self, databricks_server_info):
+    async def test_databricks_simple_query_execution(self):
         """Test executing a simple query through the Databricks client."""
         # Use a simple query that should work on any Databricks environment
         test_query = "SELECT 1 as test_column"
+        
+        # Inline server info for testing
+        databricks_server_info = {
+            "catalog": "sales_customers_demo",
+            "schema": "dp_customers_v1"
+        }
 
         # Execute the query
         results = await execute_databricks_query(databricks_server_info, test_query)
