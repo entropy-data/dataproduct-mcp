@@ -71,3 +71,4 @@ Thumbs.db
 
 !/dxt/dataproduct.dxt
 /dxt/dataproduct-mcp.dxt
+!/tests/.env
