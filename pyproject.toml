@@ -1,6 +1,6 @@
 [project]
 name = "dataproduct_mcp"
-version = "0.1.6"
+version = "0.1.7"
 description = "A Model Context Protocol (MCP) server for discovering data products, requesting access, and executing queries on the data platform to access business data."
 readme = "README.md"
 requires-python = ">=3.13"
