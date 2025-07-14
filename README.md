@@ -169,11 +169,11 @@ You need to configure a Databricks SQL warehouse. The serverless warehouse is re
 
 If you use BigQuery as a data platform, you need to create a [service account](https://cloud.google.com/iam/docs/service-accounts) and assign it the necessary permissions to access the data products. Download the service account key as a JSON file.
 
-You can use the [BigQuery Connector](https://github.com/datamesh-manager/datamesh-manager-connector-bigquery/) to automatically grant access to the data in BigQuery, when the access request is approved in Data Mesh Manager.
+You can use the [BigQuery Connector](https://github.com/datamesh-manager/datamesh-manager-connector-bigquery/) to automate permission management in BigQuery, when the access request is approved in Data Mesh Manager.
 
 The service account needs the following IAM roles:
-- `BigQuery Data Editor` - to query datasets
-- `BigQuery Job User` - to execute queries
+- `BigQuery Data Viewer` - to query datasets
+- `BigQuery Job User` - to execute queries as jobs
 
 | Environment Variable                        | Description                                                                                                                                                                            |
 |---------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -185,7 +185,7 @@ To get your service account credentials:
 1. Go to the Google Cloud Console
 2. Navigate to IAM & Admin > Service Accounts
 3. Create a new service account or use an existing one
-4. Add the `BigQuery Data Editor` and `BigQuery Job User` roles
+4. Add the `BigQuery Data Viewer` and `BigQuery Job User` roles
 5. Generate and download a JSON key file
 6. Set `BIGQUERY_CREDENTIALS_PATH` to the path of the JSON file
 
@@ -202,7 +202,7 @@ The following server types are currently supported out-of-the-box:
  |-------------|-------------|----------------------------------------------------------------------------------------------------------------------|
  | Snowflake   | ✅           | Requires SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_WAREHOUSE, SNOWFLAKE_ROLE environment variables               |
  | Databricks  | ✅           | Requires DATABRICKS_HOST, DATABRICKS_HTTP_PATH, DATABRICKS_CLIENT_ID, DATABRICKS_CLIENT_SECRET environment variables |
- | BigQuery    | ✅           | Requires BIGQUERY_CREDENTIALS_PATH environment variable (project/dataset specified in output port)                   |
+ | BigQuery    | ✅           | Requires BIGQUERY_CREDENTIALS_PATH environment variable                                                              |
  | S3          | Coming soon | Implemented through DuckDB client                                                                                    |
  | Fabric      | Coming soon |                                                                                                                      |
  
