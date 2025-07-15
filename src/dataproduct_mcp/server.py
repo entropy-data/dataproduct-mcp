@@ -301,11 +301,13 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
     Execute an SQL query on a data product's output port.
     This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
     You must have access to the output port to execute queries.
+
+    If the data contract specifies terms of use (such as usage, or limitations), you may only execute this tool when the query is in line with these terms.
     
     Args:
         data_product_id: The ID of the data product.
         output_port_id: The ID of the output port to query.
-        query: The SQL query to execute.
+        query: The SQL query to execute. Try to use fully qualified table names when appropriate.
         
     Returns:
         Dict containing query results with row count and data (limited to 100 rows).
