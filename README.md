@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/entropy-data-dataproduct-mcp-badge.png)](https://mseep.ai/app/entropy-data-dataproduct-mcp)
+
 # Data Product MCP
 
 A Model Context Protocol (MCP) server for discovering data products and requesting access in [Data Mesh Manager](https://datamesh-manager.com/), and executing queries on the data platform to access business data.
