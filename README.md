@@ -66,21 +66,9 @@ Steps:
     
 ## Installation
 
-### Claude Desktop
+You must have [uv](https://docs.astral.sh/uv/#__tabbed_1_1) installed.
 
-With Claude Desktop, you can install the MCP server as a [desktop extension](https://www.anthropic.com/engineering/desktop-extensions):
-
-- [dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
-
-Before activating, execute the following command in your terminal (this is currently required due to a bug in Claude Desktop)
-```bash
-chmod +x ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.entropy-data.dataproduct-mcp/server/venv/bin/python3.13
-```
-
-
-### All MCP Clients
-
-Add this entry to your MCP client configuration:
+Then add this entry to your MCP client configuration:
 
 ```json
 {
