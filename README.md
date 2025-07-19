@@ -66,19 +66,21 @@ Steps:
     
 ## Installation
 
-[//]: # (### Claude Desktop)
+### Claude Desktop
 
-[//]: # ()
-[//]: # (For Claude Desktop, you can install the MCP server as a [desktop extension]&#40;https://www.anthropic.com/engineering/desktop-extensions&#41;:)
+For Claude Desktop, you can install the MCP server as a [desktop extension (dxt)](https://www.anthropic.com/engineering/desktop-extensions):
 
-[//]: # ()
-[//]: # (Download and open:)
+Download and open:
 
-[//]: # ()
-[//]: # ([dataproduct-mcp.dxt]&#40;https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt&#41;)
+[dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
 
-[//]: # ()
-[//]: # (### Other MCP Clients)
+Before activating, execute the following command in your terminal (this is currently required due to a bug in Claude Desktop)
+```bash
+chmod +x ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.entropy-data.dataproduct-mcp/server/venv/bin/python3.13
+```
+
+
+### Other MCP Clients
 
 Add this entry to your MCP client configuration:
 

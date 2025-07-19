@@ -296,7 +296,7 @@ async def dataproduct_request_access(ctx: Context, data_product_id: str, output_
 
 
 @mcp.tool()
-async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: str, query: str) -> Dict[str, Any]:
+async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: str, purpose: str, query: str) -> Dict[str, Any]:
     """
     Execute an SQL query on a data product's output port.
     This tool connects to the underlying data platform (Snowflake, Databricks) and executes the provided SQL query.
@@ -307,8 +307,9 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
     Args:
         data_product_id: The ID of the data product.
         output_port_id: The ID of the output port to query.
+        purpose: The business purpose for executing this query. Use a high-level description of why you need this data. If there is a data contract, the purpose must be in line with the terms specified in the data contract.
         query: The SQL query to execute. Try to use fully qualified table names when appropriate.
-        
+
     Returns:
         Dict containing query results with row count and data (limited to 100 rows).
     """

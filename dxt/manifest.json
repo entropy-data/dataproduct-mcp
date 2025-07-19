@@ -19,12 +19,11 @@
     "type": "python",
     "entry_point": "dataproduct_mcp.server",
     "mcp_config": {
-      "command": "python3.13",
+      "command": "${__dirname}/server/venv/bin/python3.13",
       "args": [
         "-m", "dataproduct_mcp.server"
       ],
       "env": {
-        "PYTHONPATH": "${__dirname}/server/lib",
         "DATAMESH_MANAGER_API_KEY": "${user_config.DATAMESH_MANAGER_API_KEY}",
         "DATAMESH_MANAGER_HOST": "${user_config.DATAMESH_MANAGER_HOST}",
         "SNOWFLAKE_USER": "${user_config.SNOWFLAKE_USER}",
@@ -141,7 +140,7 @@
     }
   },
   "compatibility": {
-    "claude_desktop": ">=0.10.0",
+    "claude_desktop": ">=0.12.0",
     "platforms": ["darwin", "win32", "linux"],
     "runtimes": {
       "python": ">=3.13.0 <4"
