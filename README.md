@@ -68,11 +68,9 @@ Steps:
 
 ### Claude Desktop
 
-For Claude Desktop, you can install the MCP server as a [desktop extension (dxt)](https://www.anthropic.com/engineering/desktop-extensions):
+With Claude Desktop, you can install the MCP server as a [desktop extension](https://www.anthropic.com/engineering/desktop-extensions):
 
-Download and open:
-
-[dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
+- [dataproduct-mcp.dxt](https://github.com/entropy-data/dataproduct-mcp/releases/latest/download/dataproduct-mcp.dxt)
 
 Before activating, execute the following command in your terminal (this is currently required due to a bug in Claude Desktop)
 ```bash
@@ -80,7 +78,7 @@ chmod +x ~/Library/Application\ Support/Claude/Claude\ Extensions/local.dxt.entr
 ```
 
 
-### Other MCP Clients
+### All MCP Clients
 
 Add this entry to your MCP client configuration:
 
