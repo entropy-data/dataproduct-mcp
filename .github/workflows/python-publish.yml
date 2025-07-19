@@ -92,7 +92,8 @@ jobs:
       - name: Install pip dependencies and run DXT pack
         run: |
           cd dxt
-          pip3.13 install dataproduct-mcp --target server/lib --upgrade --force-reinstall
+          python3.13 -m venv server/venv
+          server/venv/bin/pip3.13 install dataproduct-mcp --upgrade --force-reinstall
           npx @anthropic-ai/dxt pack . dataproduct-mcp.dxt
 
       - name: Upload binaries to release
