@@ -64,6 +64,7 @@ The server exposes these tools to AI agents:
 ### Environment Variables
 - `DATAMESH_MANAGER_API_KEY`: Required API key for authentication
 - `DATAMESH_MANAGER_HOST`: Optional API base URL for self-hosted instances (defaults to `https://api.datamesh-manager.com`)
+- `QUERY_ACCESS_EVALUATION_ENABLED`: Optional flag to enable/disable query access evaluation (defaults to `true`). Set to `false` to skip AI-based access evaluation when AI is not enabled in Data Mesh Manager.
 
 #### BigQuery Configuration
 - `BIGQUERY_CREDENTIALS_PATH`: Path to service account key file
@@ -81,7 +82,8 @@ Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "env": {
         "DATAMESH_MANAGER_API_KEY": "dmm_live_...",
         "DATAMESH_MANAGER_HOST": "https://your-self-hosted-instance.com",
-        "BIGQUERY_CREDENTIALS_PATH": "/path/to/service-account-key.json"
+        "BIGQUERY_CREDENTIALS_PATH": "/path/to/service-account-key.json",
+        "QUERY_ACCESS_EVALUATION_ENABLED": "true"
       }
     }
   }

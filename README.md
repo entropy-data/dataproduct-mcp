@@ -121,12 +121,15 @@ This is the format for Claude Desktop (`~/Library/Application Support/Claude/cla
 |---------------------|-------------|----------|---------|
 | `DATAMESH_MANAGER_API_KEY` | API key for authentication | Yes | N/A |
 | `DATAMESH_MANAGER_HOST` | Base URL for self-hosted instances | No | `https://api.datamesh-manager.com` |
+| `QUERY_ACCESS_EVALUATION_ENABLED` | Enable/disable AI-based query access evaluation | No | `true` |
 
 To authenticate with Data Mesh Manager, you need to set the `DATAMESH_MANAGER_API_KEY` variable to your API key.
 
 [How to create an API Key in Data Mesh Manager](https://docs.datamesh-manager.com/authentication).
 
 For self-hosted Data Mesh Manager instances, set the `DATAMESH_MANAGER_HOST` environment variable to your instance URL.
+
+Set `QUERY_ACCESS_EVALUATION_ENABLED` to `false` to disable AI-based query access evaluation when AI features are not enabled in your Data Mesh Manager instance.
 
 (Yes, we will work on OAuth2 based authentication to simplify this in the future.)
 

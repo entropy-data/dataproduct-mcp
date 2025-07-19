@@ -1,3 +1,4 @@
+import os
 from typing import Any, List, Dict, Optional
 from mcp.server.fastmcp import FastMCP, Context
 from dotenv import load_dotenv
@@ -355,11 +356,32 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
         
         await ctx.info("Query passed read-only validation")
 
-        # Check that the query is in line with the purpose of the access agreement, and the data contract terms (dont be strict)
-        # this check can be performed using a callback to the llm
-        # todo
-
-        # In the future, we can also check that the query is not violating any global policies
+        # Evaluate access with purpose, data governance, and compliance check
+        query_access_evaluation_enabled = os.getenv("QUERY_ACCESS_EVALUATION_ENABLED", "true").lower() == "true"
+        
+        if query_access_evaluation_enabled:
+            try:
+                evaluation_response = await client.evaluate_access(data_product_id, output_port_id, query, purpose)
+                
+                if not evaluation_response.decision:
+                    reasons = []
+                    if evaluation_response.context and evaluation_response.context.reasons:
+                        for reason in evaluation_response.context.reasons:
+                            if reason.reason_user:
+                                user_reason = reason.reason_user.get("en", str(reason.reason_user))
+                                reasons.append(user_reason)
+                    
+                    reason_text = "; ".join(reasons) if reasons else "Access evaluation failed"
+                    await ctx.error(f"Access evaluation failed: {reason_text}")
+                    return {"error": f"Query not permitted: {reason_text}"}
+                
+                await ctx.info("Access evaluation passed - query is permitted")
+                
+            except Exception as e:
+                await ctx.warning(f"Access evaluation failed due to error: {str(e)}. Proceeding without evaluation.")
+                # Continue with query execution even if evaluation fails
+        else:
+            await ctx.info("Query access evaluation is disabled via QUERY_ACCESS_EVALUATION_ENABLED=false")
 
 
         # Get server information and type

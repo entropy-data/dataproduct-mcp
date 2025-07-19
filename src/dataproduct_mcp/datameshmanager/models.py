@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
 
@@ -41,3 +41,54 @@ class RequestAccessResult(BaseModel):
     model_config = {
         "populate_by_name": True
     }
+
+
+class AccessEvaluationSubject(BaseModel):
+    """Subject for access evaluation request."""
+    
+    type: str
+    id: str
+
+
+class AccessEvaluationResource(BaseModel):
+    """Resource for access evaluation request."""
+    
+    type: str
+    id: str
+    properties: Optional[Dict[str, Any]] = None
+
+
+class AccessEvaluationAction(BaseModel):
+    """Action for access evaluation request."""
+    
+    name: str
+    properties: Optional[Dict[str, Any]] = None
+
+
+class AccessEvaluationRequest(BaseModel):
+    """Request model for access evaluation."""
+    
+    subject: AccessEvaluationSubject
+    resource: AccessEvaluationResource
+    action: AccessEvaluationAction
+
+
+class AccessEvaluationReason(BaseModel):
+    """Reason for access evaluation decision."""
+    
+    id: str
+    reason_admin: Optional[Dict[str, str]] = None
+    reason_user: Optional[Dict[str, str]] = None
+
+
+class AccessEvaluationContext(BaseModel):
+    """Context for access evaluation response."""
+    
+    reasons: Optional[List[AccessEvaluationReason]] = None
+
+
+class AccessEvaluationResponse(BaseModel):
+    """Response model for access evaluation."""
+    
+    decision: bool
+    context: Optional[AccessEvaluationContext] = None

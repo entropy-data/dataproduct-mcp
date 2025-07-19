@@ -26,6 +26,7 @@
       "env": {
         "DATAMESH_MANAGER_API_KEY": "${user_config.DATAMESH_MANAGER_API_KEY}",
         "DATAMESH_MANAGER_HOST": "${user_config.DATAMESH_MANAGER_HOST}",
+        "QUERY_ACCESS_EVALUATION_ENABLED": "${user_config.QUERY_ACCESS_EVALUATION_ENABLED}",
         "SNOWFLAKE_USER": "${user_config.SNOWFLAKE_USER}",
         "SNOWFLAKE_PASSWORD": "${user_config.SNOWFLAKE_PASSWORD}",
         "SNOWFLAKE_ROLE": "${user_config.SNOWFLAKE_ROLE}",
@@ -137,6 +138,14 @@
       "description": "Path to service account JSON key file for BigQuery authentication",
       "required": false,
       "sensitive": false
+    },
+    "QUERY_ACCESS_EVALUATION_ENABLED": {
+      "type": "string",
+      "title": "Query Access Evaluation",
+      "description": "Enable or disable AI-based query access evaluation (true/false). Disable when AI features are not available in Data Mesh Manager.",
+      "required": false,
+      "sensitive": false,
+      "default": "true"
     }
   },
   "compatibility": {

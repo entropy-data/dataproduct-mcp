@@ -9,6 +9,7 @@
               ],
           "env": {
             "DATAMESH_MANAGER_API_KEY": "dmm_live_user_...",
+            "QUERY_ACCESS_EVALUATION_ENABLED": "true",
             "SNOWFLAKE_USER": "MY_SNOWFLAKE_USER_NAME",
             "SNOWFLAKE_PASSWORD": "MY_SNOWFLAKE_PASSWORD",
             "SNOWFLAKE_ROLE": "MY_SNOWFLAKE_ROLE",

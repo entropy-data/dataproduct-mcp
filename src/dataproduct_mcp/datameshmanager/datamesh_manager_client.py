@@ -2,7 +2,16 @@ import os
 import logging
 import httpx
 from typing import List, Dict, Any, Optional
-from .models import AccessStatusResult, RequestAccessRequest, RequestAccessResult
+from .models import (
+    AccessStatusResult,
+    RequestAccessRequest,
+    RequestAccessResult,
+    AccessEvaluationRequest,
+    AccessEvaluationResponse,
+    AccessEvaluationSubject,
+    AccessEvaluationResource,
+    AccessEvaluationAction,
+)
 
 
 class DataMeshManagerClient:
@@ -365,3 +374,68 @@ class DataMeshManagerClient:
             data = response.json()
             self.logger.info(f"POST request to {url} successful, status: {response.status_code}")
             return RequestAccessResult(**data)
+    
+    async def evaluate_access(
+        self, 
+        data_product_id: str, 
+        output_port_id: str, 
+        query: str, 
+        purpose: str
+    ) -> AccessEvaluationResponse:
+        """
+        Evaluate access permissions for a query against a data product's output port.
+        This follows the OpenID Authorization API 1.0 specification.
+        This is a private endpoint that requires internal API access and user scope.
+        
+        Args:
+            data_product_id: The ID of the data product.
+            output_port_id: The ID of the output port.
+            query: The SQL query to evaluate.
+            purpose: The business purpose for the query.
+            
+        Returns:
+            Access evaluation response with decision and optional context/reasons.
+            
+        Raises:
+            httpx.HTTPStatusError: If the API request fails.
+            ValueError: If required parameters are missing.
+        """
+        if not data_product_id:
+            raise ValueError("Data product ID is required")
+        if not output_port_id:
+            raise ValueError("Output port ID is required")
+        if not query:
+            raise ValueError("Query is required")
+        if not purpose:
+            raise ValueError("Purpose is required")
+            
+        # Build the access evaluation request
+        request = AccessEvaluationRequest(
+            subject=AccessEvaluationSubject(
+                type="user",
+                id="current_user"
+            ),
+            resource=AccessEvaluationResource(
+                type="data_product",
+                id=data_product_id,
+                properties={"outputPortId": output_port_id}
+            ),
+            action=AccessEvaluationAction(
+                name="query",
+                properties={"sql": query, "purpose": purpose}
+            )
+        )
+        
+        url = f"{self.base_url}/api/access/evaluation"
+        
+        # Add the internal API header required for this private endpoint
+        headers = self.headers.copy()
+        headers["x-internal-api"] = "true"
+        
+        self.logger.info(f"Making POST request to {url} for access evaluation")
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, headers=headers, json=request.model_dump())
+            response.raise_for_status()
+            data = response.json()
+            self.logger.info(f"POST request to {url} successful, status: {response.status_code}, decision: {data.get('decision')}")
+            return AccessEvaluationResponse(**data)
