@@ -1,19 +1,19 @@
 [project]
 name = "dataproduct_mcp"
-version = "0.1.7"
+version = "0.1.8"
 description = "A Model Context Protocol (MCP) server for discovering data products, requesting access, and executing queries on the data platform to access business data."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "httpx>=0.28.1",
-    "mcp[cli]>=1.9.4",
+    "mcp[cli]>=1.12.0",
     "PyYAML>=6.0",
-    "python-dotenv>=1.0.0",
+    "python-dotenv>=1.1.1",
     "pydantic>=2.0.0",
     "snowflake-connector-python>=3.0.0",
     "databricks-sql-connector>=3.0.0",
-    "databricks-sdk>=0.20.0",
-    "google-cloud-bigquery>=3.0.0",
+    "databricks-sdk>=0.59.0",
+    "google-cloud-bigquery>=3.35.0",
 ]
 
 [project.optional-dependencies]

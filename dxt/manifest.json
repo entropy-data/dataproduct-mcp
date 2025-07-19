@@ -2,7 +2,7 @@
   "dxt_version": "0.1",
   "name": "dataproduct-mcp",
   "display_name": "Data Product MCP",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "An MCP server to securely access business data.",
   "author": {
     "name": "Entropy Data",
