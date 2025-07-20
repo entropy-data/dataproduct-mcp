@@ -72,7 +72,7 @@ jobs:
   dxt:
     name: dxt
     needs: pypi-publish
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     permissions:
       contents: write
     steps:
