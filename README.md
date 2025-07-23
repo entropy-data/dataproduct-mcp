@@ -2,8 +2,8 @@
 
 A Model Context Protocol (MCP) server for discovering data products and requesting access in [Data Mesh Manager](https://datamesh-manager.com/), and executing queries on the data platform to access business data.
 
-[![Data Product MCP Demo](https://jochenchrist-public.s3.eu-central-1.amazonaws.com/Data+Product+MCP.gif)](https://www.youtube.com/embed/egKCGGmIFLI)
 
+[![Data Product MCP Demo](http://img.youtube.com/vi/egKCGGmIFLI/0.jpg)](http://www.youtube.com/watch?v=egKCGGmIFLI "Data Product")
 
 
 ## Concept
