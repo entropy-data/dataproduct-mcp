@@ -2,8 +2,29 @@
 
 A Model Context Protocol (MCP) server for discovering data products and requesting access in [Data Mesh Manager](https://datamesh-manager.com/), and executing queries on the data platform to access business data.
 
-
-https://github.com/user-attachments/assets/8c8cd04d-33f6-4e33-856f-6141a41af2bb
+<div class="embed-container">
+  <iframe width="640" height="390"
+          src="https://www.youtube.com/embed/egKCGGmIFLI"
+          frameborder="0" allowfullscreen></iframe>
+</div>
+<style>
+  .embed-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+  }
+  .embed-container iframe,
+  .embed-container object,
+  .embed-container embed {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>
 
 
 ## Concept
@@ -81,6 +102,7 @@ Then add this entry to your MCP client configuration:
       "env": {
         "DATAMESH_MANAGER_API_KEY": "dmm_live_user_...",
         "DATAMESH_MANAGER_HOST": "https://api.datamesh-manager.com",
+        "QUERY_ACCESS_EVALUATION_ENABLED": "true",
         "SNOWFLAKE_USER": "",
         "SNOWFLAKE_PASSWORD": "",
         "SNOWFLAKE_ROLE": "",
