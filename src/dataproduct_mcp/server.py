@@ -6,7 +6,7 @@ from .datameshmanager.datamesh_manager_client import DataMeshManagerClient
 from .connections.snowflake_client import execute_snowflake_query
 from .connections.databricks_client import execute_databricks_query
 from .connections.bigquery_client import execute_bigquery_query
-from .safeguards import validate_readonly_query, sanitize_prompt_injection
+from .guardrails import validate_readonly_query, sanitize_prompt_injection
 
 load_dotenv()
 
@@ -349,7 +349,7 @@ async def dataproduct_query(ctx: Context, data_product_id: str, output_port_id: 
             await ctx.error(f"Failed to check access status: {str(e)}")
             return {"error": "Unable to verify access status. Please ensure you have access to this output port."}
 
-        # Apply security safeguards to prevent write operations and dangerous patterns
+        # Apply security guardrails to prevent write operations and dangerous patterns
         if not validate_readonly_query(query):
             await ctx.error("Query validation failed: Query rejected for security reasons")
             return {"error": "Query rejected for security reasons"}

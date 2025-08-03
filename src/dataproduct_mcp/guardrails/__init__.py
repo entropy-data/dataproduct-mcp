@@ -1,5 +1,5 @@
 """
-Safeguards package for preventing attack vectors and ensuring secure query execution.
+Guardrails package for preventing attack vectors and ensuring secure query execution.
 """
 
 from .readonly import validate_readonly_query

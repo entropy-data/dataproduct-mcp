@@ -19,7 +19,7 @@ INJECTION_VERBS = {
 
 INJECTION_OBJECTS = {
     'instructions', 'prompt', 'rules', 'guidelines',
-    'constraints', 'limitations', 'restrictions', 'safeguards',
+    'constraints', 'limitations', 'restrictions', 'guardrails',
     'protection', 'previous', 'above', 'earlier'
 }
 
@@ -172,7 +172,7 @@ def _check_suspicious_phrases(text: str) -> bool:
         'emergency mode', 'crisis mode', 'special mode',
         'developer access', 'admin access', 'root access',
         'full permissions', 'unlimited permissions', 'unrestricted permissions',
-        'bypass restrictions', 'remove limitations', 'disable safeguards',
+        'bypass restrictions', 'remove limitations', 'disable guardrails',
         'override security', 'disable security', 'bypass security',
         'ignore safety', 'disable safety', 'bypass safety',
         'confidential mode', 'secret mode', 'hidden mode',

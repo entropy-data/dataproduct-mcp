@@ -1,8 +1,8 @@
 """
-Tests for prompt injection detection safeguards.
+Tests for prompt injection detection guardrails.
 """
 import pytest
-from dataproduct_mcp.safeguards.prompt_injection import (
+from dataproduct_mcp.guardrails.prompt_injection import (
     detect_prompt_injection,
     validate_no_prompt_injection,
     sanitize_prompt_injection
