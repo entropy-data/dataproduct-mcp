@@ -24,7 +24,6 @@ Finally, the LLM can generate SQL queries based on the data contracts data model
 
 ![](docs/architecture.svg)
 
-
 Steps:
 1. **Discovery:** Find relevant data products for task in the data product marketplace
 2. **Governance:** Check and request access to data products
