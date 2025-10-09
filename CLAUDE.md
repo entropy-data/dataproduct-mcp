@@ -67,12 +67,32 @@ The server exposes these tools to AI agents:
 - `QUERY_ACCESS_EVALUATION_ENABLED`: Optional flag to enable/disable query access evaluation (defaults to `true`). Set to `false` to skip AI-based access evaluation when AI is not enabled in Data Mesh Manager.
 
 #### BigQuery Configuration
-- `BIGQUERY_CREDENTIALS_PATH`: Path to service account key file
+
+The BigQuery client supports three authentication methods with automatic fallback:
+
+1. **Service Account JSON** (Recommended for production)
+   - Set `BIGQUERY_CREDENTIALS_PATH` to path of service account key file
+   - Example: `BIGQUERY_CREDENTIALS_PATH=/path/to/service-account-key.json`
+
+2. **Workload Identity Federation** (Recommended for cloud environments)
+   - Set `BIGQUERY_CREDENTIALS_PATH` to path of workload identity federation config
+   - Example: `BIGQUERY_CREDENTIALS_PATH=/path/to/wif-config.json`
+
+3. **Application Default Credentials** (Recommended for local development)
+   - Do not set `BIGQUERY_CREDENTIALS_PATH` or set it to empty
+   - Run `gcloud auth application-default login` for local user credentials
+   - Automatically used in cloud environments (GCE, Cloud Run, GKE, etc.)
+
+**Authentication Priority:**
+- If `BIGQUERY_CREDENTIALS_PATH` is set, tries service account JSON first, then workload identity federation
+- If not set or file not found, falls back to Application Default Credentials
 
 **Note**: Google Cloud Project ID and dataset information are specified in the data product's output port server configuration, not as environment variables.
 
 ### Claude Desktop Integration
 Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+**Example 1: Using Service Account JSON**
 ```json
 {
   "mcpServers": {
@@ -89,6 +109,24 @@ Configure in `~/Library/Application Support/Claude/claude_desktop_config.json`:
   }
 }
 ```
+
+**Example 2: Using Application Default Credentials (local development)**
+```json
+{
+  "mcpServers": {
+    "dataproduct": {
+      "command": "uv",
+      "args": ["run", "--directory", "<path_to_folder>/dataproduct-mcp", "python", "-m", "dataproduct_mcp.server"],
+      "env": {
+        "DATAMESH_MANAGER_API_KEY": "dmm_live_...",
+        "DATAMESH_MANAGER_HOST": "https://your-self-hosted-instance.com",
+        "QUERY_ACCESS_EVALUATION_ENABLED": "true"
+      }
+    }
+  }
+}
+```
+Note: Run `gcloud auth application-default login` before using ADC.
 
 ## Code Patterns
 
