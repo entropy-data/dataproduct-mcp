@@ -65,6 +65,41 @@ Steps:
     
 ## Installation
 
+### Option 1: Using Docker
+
+**Prerequisites:**
+- Follow the official [Docker installation guide](https://docs.docker.com/get-docker/) for your operating system
+- Verify Docker is running:
+   ```bash
+   docker --version
+   ```
+- Build the image
+  ```bash
+  docker build -t dataproduct-mcp:latest .
+  ```
+
+Use the Docker image for the easiest setup:
+
+```json
+{
+  "mcpServers": {
+    "dataproduct": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e", "DATAMESH_MANAGER_API_KEY=dmm_live_user_...",
+        "-e", "DATAMESH_MANAGER_HOST=https://api.datamesh-manager.com",
+        "dataproduct-mcp:latest"
+      ]
+    }
+  }
+}
+```
+
+### Option 2: Using uvx
+
 You must have [uv](https://docs.astral.sh/uv/#__tabbed_1_1) installed.
 
 Then add this entry to your MCP client configuration:
